@@ -83,6 +83,16 @@ export async function requireGuildAdmin(guildId: string) {
   return { session: s, guild };
 }
 
+/** Is the bot a member of this guild? `null` when the bot API can't be reached (state unknown). */
+export async function botInGuild(guildId: string): Promise<boolean | null> {
+  try {
+    return (await botApi<{ guildIds: string[] }>("/guilds")).guildIds.includes(guildId);
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+}
+
 /** Calls the Argus bot's own HTTP API. */
 export async function botApi<T>(path: string, init?: RequestInit): Promise<T> {
   const base = process.env["BOT_API_URL"]?.replace(/\/$/, "");

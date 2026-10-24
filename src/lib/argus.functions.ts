@@ -63,9 +63,18 @@ const guildInput = z.object({ guildId: z.string().regex(/^\d{5,25}$/) });
 export const getGuild = createServerFn({ method: "GET" })
   .inputValidator((d) => guildInput.parse(d))
   .handler(async ({ data }) => {
-    const { requireGuildAdmin } = await import("./argus.server");
+    const { requireGuildAdmin, botInGuild } = await import("./argus.server");
     const { guild } = await requireGuildAdmin(data.guildId);
-    return { id: guild.id, name: guild.name, icon: guild.icon };
+    return { id: guild.id, name: guild.name, icon: guild.icon, botPresent: await botInGuild(guild.id) };
+  });
+
+/** Polled while the user is adding the bot in the Discord window. */
+export const getBotPresence = createServerFn({ method: "GET" })
+  .inputValidator((d) => guildInput.parse(d))
+  .handler(async ({ data }) => {
+    const { requireGuildAdmin, botInGuild } = await import("./argus.server");
+    await requireGuildAdmin(data.guildId);
+    return { botPresent: await botInGuild(data.guildId) };
   });
 
 export const getGuildLogs = createServerFn({ method: "GET" })

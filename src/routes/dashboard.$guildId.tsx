@@ -1,6 +1,7 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, BarChart3, LayoutDashboard, ScrollText, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowLeft, BarChart3, LayoutDashboard, Plus, ScrollText, ShieldCheck, Sparkles } from "lucide-react";
+import { useBotInvite } from "@/components/InviteBot";
 import { LoginGate, Shell } from "@/components/Shell";
 import { Skeleton } from "@/components/motion";
 import { getGuild } from "@/lib/argus.functions";
@@ -30,17 +31,39 @@ function GuildLayout() {
   const { guildId } = Route.useParams();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const q = useQuery({ queryKey: ["guild", guildId], queryFn: () => getGuild({ data: { guildId } }), staleTime: 5 * 60_000, retry: false });
+  const invite = useBotInvite();
 
   if (q.error)
     return (
       <div className="mx-auto max-w-md px-5 py-24 text-center">
         <div className="glass p-10">
           <h2 className="text-xl font-bold">No access</h2>
-          <p className="mt-2 text-sm text-muted-foreground">You don't have access to this server, or Argus isn't on it.</p>
+          <p className="mt-2 text-sm text-muted-foreground">You don't have access to this server.</p>
           <Link to="/dashboard" className="btn-ghost mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm">
             <ArrowLeft className="h-4 w-4" /> {t.servers}
           </Link>
         </div>
+      </div>
+    );
+
+  // Opened a server (e.g. via direct link) that Argus hasn't joined yet: offer the same "add bot" flow.
+  const missing = q.data?.botPresent === false ? q.data : null;
+  if (missing)
+    return (
+      <div className="mx-auto max-w-md px-5 py-24 text-center">
+        <div className="glass p-10">
+          <h2 className="text-xl font-bold">{t.botNotOnServer}</h2>
+          <p className="mt-2 text-sm text-muted-foreground">{t.botNotOnServerHint}</p>
+          <button type="button" onClick={() => invite.start(missing)} className="btn-gold mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm">
+            <Plus className="h-4 w-4" /> {t.addBot}
+          </button>
+          <div className="mt-3">
+            <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition hover:text-gold">
+              <ArrowLeft className="h-4 w-4" /> {t.servers}
+            </Link>
+          </div>
+        </div>
+        {invite.dialog}
       </div>
     );
 

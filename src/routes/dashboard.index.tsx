@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { ChevronRight, Search } from "lucide-react";
+import { ChevronRight, Plus, Search } from "lucide-react";
+import { useBotInvite } from "@/components/InviteBot";
 import { LoginGate, Shell } from "@/components/Shell";
 import { Reveal, Skeleton, Spotlight } from "@/components/motion";
 import { getAdminGuilds } from "@/lib/argus.functions";
@@ -30,6 +31,7 @@ export const Route = createFileRoute("/dashboard/")({
 function Servers() {
   const q = useQuery({ queryKey: ["guilds"], queryFn: () => getAdminGuilds(), staleTime: 60_000 });
   const [search, setSearch] = useState("");
+  const invite = useBotInvite();
   const list = useMemo(() => {
     const needle = search.trim().toLowerCase();
     return (q.data ?? [])
@@ -74,9 +76,10 @@ function Servers() {
             </div>
           ))}
 
-        {list.map((g, i) => (
-          <Reveal key={g.id} delay={Math.min(i, 8) * 50}>
-            <Spotlight as={Link} to="/dashboard/$guildId" params={{ guildId: g.id }} className="group flex items-center gap-4 p-5">
+        {list.map((g, i) => {
+          const botMissing = g.botPresent === false;
+          const content = (
+            <>
               {g.icon ? (
                 <img src={`https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=96`} alt="" width={56} height={56} loading="lazy" className="h-14 w-14 rounded-xl ring-1 ring-border transition group-hover:ring-gold/60" />
               ) : (
@@ -85,15 +88,34 @@ function Servers() {
               <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold transition group-hover:text-gold">{g.name}</p>
                 <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <span className={`h-1.5 w-1.5 rounded-full ${g.botPresent ? "bg-success" : g.botPresent === false ? "bg-muted-foreground/50" : "bg-warning"}`} />
-                  {g.botPresent === null ? "Manage" : g.botPresent ? "Argus is active" : "Argus not added yet"}
+                  <span className={`h-1.5 w-1.5 rounded-full ${g.botPresent ? "bg-success" : botMissing ? "bg-muted-foreground/50" : "bg-warning"}`} />
+                  {g.botPresent === null ? "Manage" : g.botPresent ? "Argus is active" : t.botMissing}
                 </p>
               </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-gold" />
-            </Spotlight>
-          </Reveal>
-        ))}
+              {botMissing ? (
+                <Plus className="h-5 w-5 text-muted-foreground transition group-hover:rotate-90 group-hover:text-gold" />
+              ) : (
+                <ChevronRight className="h-5 w-5 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-gold" />
+              )}
+            </>
+          );
+          return (
+            <Reveal key={g.id} delay={Math.min(i, 8) * 50}>
+              {botMissing ? (
+                // No bot on this server yet: open Discord's "add bot" window first, dashboard comes after.
+                <Spotlight as="button" type="button" onClick={() => invite.start(g)} className="group flex w-full items-center gap-4 p-5 text-left">
+                  {content}
+                </Spotlight>
+              ) : (
+                <Spotlight as={Link} to="/dashboard/$guildId" params={{ guildId: g.id }} className="group flex items-center gap-4 p-5">
+                  {content}
+                </Spotlight>
+              )}
+            </Reveal>
+          );
+        })}
       </div>
+      {invite.dialog}
     </div>
   );
 }
