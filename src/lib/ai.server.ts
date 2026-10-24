@@ -18,7 +18,7 @@ export async function generateWithGemini(prompt: string): Promise<Architecture> 
   });
   let failure: unknown = null;
   const result = streamText({
-    model: provider("google/gemini-3.8-flash"),
+    model: provider("google/gemini-3.8-flash") as unknown as Parameters<typeof streamText>[0]["model"],
     system: SYSTEM,
     prompt: `Server description (json output): ${prompt}`,
     onError: ({ error }) => {
