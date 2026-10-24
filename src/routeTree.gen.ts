@@ -10,13 +10,46 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ServersRouteImport } from './routes/servers'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as DashboardGuildIdRouteImport } from './routes/dashboard.$guildId'
 import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
 import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth/logout'
+import { Route as DashboardGuildIdIndexRouteImport } from './routes/dashboard.$guildId.index'
+import { Route as DashboardGuildIdAibuildRouteImport } from './routes/dashboard.$guildId.aibuild'
+import { Route as DashboardGuildIdLogsRouteImport } from './routes/dashboard.$guildId.logs'
 import { Route as ApiAuthCallbackDiscordRouteImport } from './routes/api/auth/callback/discord'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServersRoute = ServersRouteImport.update({
+  id: '/servers',
+  path: '/servers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardGuildIdRoute = DashboardGuildIdRouteImport.update({
+  id: '/dashboard/$guildId',
+  path: '/dashboard/$guildId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
@@ -29,6 +62,21 @@ const ApiAuthLogoutRoute = ApiAuthLogoutRouteImport.update({
   path: '/api/auth/logout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardGuildIdIndexRoute = DashboardGuildIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardGuildIdRoute,
+} as any)
+const DashboardGuildIdAibuildRoute = DashboardGuildIdAibuildRouteImport.update({
+  id: '/aibuild',
+  path: '/aibuild',
+  getParentRoute: () => DashboardGuildIdRoute,
+} as any)
+const DashboardGuildIdLogsRoute = DashboardGuildIdLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
+  getParentRoute: () => DashboardGuildIdRoute,
+} as any)
 const ApiAuthCallbackDiscordRoute = ApiAuthCallbackDiscordRouteImport.update({
   id: '/api/auth/callback/discord',
   path: '/api/auth/callback/discord',
@@ -37,40 +85,97 @@ const ApiAuthCallbackDiscordRoute = ApiAuthCallbackDiscordRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/privacy': typeof PrivacyRoute
+  '/servers': typeof ServersRoute
+  '/terms': typeof TermsRoute
+  '/dashboard/$guildId': typeof DashboardGuildIdRouteWithChildren
+  '/dashboard/': typeof DashboardIndexRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/dashboard/$guildId/aibuild': typeof DashboardGuildIdAibuildRoute
+  '/dashboard/$guildId/logs': typeof DashboardGuildIdLogsRoute
+  '/dashboard/$guildId/': typeof DashboardGuildIdIndexRoute
   '/api/auth/callback/discord': typeof ApiAuthCallbackDiscordRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/privacy': typeof PrivacyRoute
+  '/servers': typeof ServersRoute
+  '/terms': typeof TermsRoute
+  '/dashboard': typeof DashboardIndexRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/dashboard/$guildId/aibuild': typeof DashboardGuildIdAibuildRoute
+  '/dashboard/$guildId/logs': typeof DashboardGuildIdLogsRoute
+  '/dashboard/$guildId': typeof DashboardGuildIdIndexRoute
   '/api/auth/callback/discord': typeof ApiAuthCallbackDiscordRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/privacy': typeof PrivacyRoute
+  '/servers': typeof ServersRoute
+  '/terms': typeof TermsRoute
+  '/dashboard/$guildId': typeof DashboardGuildIdRouteWithChildren
+  '/dashboard/': typeof DashboardIndexRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/dashboard/$guildId/aibuild': typeof DashboardGuildIdAibuildRoute
+  '/dashboard/$guildId/logs': typeof DashboardGuildIdLogsRoute
+  '/dashboard/$guildId/': typeof DashboardGuildIdIndexRoute
   '/api/auth/callback/discord': typeof ApiAuthCallbackDiscordRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/api/auth/login' | '/api/auth/logout' | '/api/auth/callback/discord'
+    | '/'
+    | '/privacy'
+    | '/servers'
+    | '/terms'
+    | '/dashboard/$guildId'
+    | '/dashboard/'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/dashboard/$guildId/aibuild'
+    | '/dashboard/$guildId/logs'
+    | '/dashboard/$guildId/'
+    | '/api/auth/callback/discord'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/api/auth/login' | '/api/auth/logout' | '/api/auth/callback/discord'
+    | '/'
+    | '/privacy'
+    | '/servers'
+    | '/terms'
+    | '/dashboard'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/dashboard/$guildId/aibuild'
+    | '/dashboard/$guildId/logs'
+    | '/dashboard/$guildId'
+    | '/api/auth/callback/discord'
   id:
     | '__root__'
     | '/'
+    | '/privacy'
+    | '/servers'
+    | '/terms'
+    | '/dashboard/$guildId'
+    | '/dashboard/'
     | '/api/auth/login'
     | '/api/auth/logout'
+    | '/dashboard/$guildId/aibuild'
+    | '/dashboard/$guildId/logs'
+    | '/dashboard/$guildId/'
     | '/api/auth/callback/discord'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PrivacyRoute: typeof PrivacyRoute
+  ServersRoute: typeof ServersRoute
+  TermsRoute: typeof TermsRoute
+  DashboardGuildIdRoute: typeof DashboardGuildIdRouteWithChildren
+  DashboardIndexRoute: typeof DashboardIndexRoute
   ApiAuthLoginRoute: typeof ApiAuthLoginRoute
   ApiAuthLogoutRoute: typeof ApiAuthLogoutRoute
   ApiAuthCallbackDiscordRoute: typeof ApiAuthCallbackDiscordRoute
@@ -83,6 +188,41 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/servers': {
+      id: '/servers'
+      path: '/servers'
+      fullPath: '/servers'
+      preLoaderRoute: typeof ServersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/$guildId': {
+      id: '/dashboard/$guildId'
+      path: '/dashboard/$guildId'
+      fullPath: '/dashboard/$guildId'
+      preLoaderRoute: typeof DashboardGuildIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/login': {
@@ -99,6 +239,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthLogoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/$guildId/': {
+      id: '/dashboard/$guildId/'
+      path: '/'
+      fullPath: '/dashboard/$guildId/'
+      preLoaderRoute: typeof DashboardGuildIdIndexRouteImport
+      parentRoute: typeof DashboardGuildIdRoute
+    }
+    '/dashboard/$guildId/aibuild': {
+      id: '/dashboard/$guildId/aibuild'
+      path: '/aibuild'
+      fullPath: '/dashboard/$guildId/aibuild'
+      preLoaderRoute: typeof DashboardGuildIdAibuildRouteImport
+      parentRoute: typeof DashboardGuildIdRoute
+    }
+    '/dashboard/$guildId/logs': {
+      id: '/dashboard/$guildId/logs'
+      path: '/logs'
+      fullPath: '/dashboard/$guildId/logs'
+      preLoaderRoute: typeof DashboardGuildIdLogsRouteImport
+      parentRoute: typeof DashboardGuildIdRoute
+    }
     '/api/auth/callback/discord': {
       id: '/api/auth/callback/discord'
       path: '/api/auth/callback/discord'
@@ -109,8 +270,28 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface DashboardGuildIdRouteChildren {
+  DashboardGuildIdAibuildRoute: typeof DashboardGuildIdAibuildRoute
+  DashboardGuildIdLogsRoute: typeof DashboardGuildIdLogsRoute
+  DashboardGuildIdIndexRoute: typeof DashboardGuildIdIndexRoute
+}
+
+const DashboardGuildIdRouteChildren: DashboardGuildIdRouteChildren = {
+  DashboardGuildIdAibuildRoute: DashboardGuildIdAibuildRoute,
+  DashboardGuildIdLogsRoute: DashboardGuildIdLogsRoute,
+  DashboardGuildIdIndexRoute: DashboardGuildIdIndexRoute,
+}
+
+const DashboardGuildIdRouteWithChildren =
+  DashboardGuildIdRoute._addFileChildren(DashboardGuildIdRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PrivacyRoute: PrivacyRoute,
+  ServersRoute: ServersRoute,
+  TermsRoute: TermsRoute,
+  DashboardGuildIdRoute: DashboardGuildIdRouteWithChildren,
+  DashboardIndexRoute: DashboardIndexRoute,
   ApiAuthLoginRoute: ApiAuthLoginRoute,
   ApiAuthLogoutRoute: ApiAuthLogoutRoute,
   ApiAuthCallbackDiscordRoute: ApiAuthCallbackDiscordRoute,
