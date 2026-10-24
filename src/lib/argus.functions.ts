@@ -1,0 +1,78 @@
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { architectureSchema, type Architecture } from "./architecture";
+
+export type BotStatus = { online: boolean; username: string; guilds: number; uptimeSeconds: number };
+export type ModLog = { id: string; action: string; target: string; moderator: string; reason: string | null; createdAt: string };
+
+export const getMe = createServerFn({ method: "GET" }).handler(async () => {
+  const { currentSession } = await import("./argus.server");
+  const s = await currentSession();
+  return s ? { id: s.id, username: s.username, avatar: s.avatar } : null;
+});
+
+export const getBotStatus = createServerFn({ method: "GET" }).handler(async () => {
+  const { botApi } = await import("./argus.server");
+  try {
+    return { ok: true as const, status: await botApi<BotStatus>("/status") };
+  } catch (e) {
+    console.error(e);
+    return { ok: false as const, error: "Bot status is unavailable right now." };
+  }
+});
+
+export const getAdminGuilds = createServerFn({ method: "GET" }).handler(async () => {
+  const { requireSession, adminGuilds, botApi } = await import("./argus.server");
+  const s = await requireSession();
+  const guilds = await adminGuilds(s.accessToken);
+  let botGuildIds: string[] | null = null;
+  try {
+    botGuildIds = (await botApi<{ guildIds: string[] }>("/guilds")).guildIds;
+  } catch (e) {
+    console.error(e);
+  }
+  return guilds.map((g) => ({
+    id: g.id,
+    name: g.name,
+    icon: g.icon,
+    botPresent: botGuildIds ? botGuildIds.includes(g.id) : null,
+  }));
+});
+
+const guildInput = z.object({ guildId: z.string().regex(/^\d{5,25}$/) });
+
+export const getGuild = createServerFn({ method: "GET" })
+  .inputValidator((d) => guildInput.parse(d))
+  .handler(async ({ data }) => {
+    const { requireGuildAdmin } = await import("./argus.server");
+    const { guild } = await requireGuildAdmin(data.guildId);
+    return { id: guild.id, name: guild.name, icon: guild.icon };
+  });
+
+export const getGuildLogs = createServerFn({ method: "GET" })
+  .inputValidator((d) => guildInput.parse(d))
+  .handler(async ({ data }) => {
+    const { requireGuildAdmin, botApi } = await import("./argus.server");
+    await requireGuildAdmin(data.guildId);
+    return (await botApi<{ logs: ModLog[] }>(`/guilds/${data.guildId}/logs?limit=100`)).logs;
+  });
+
+export const generateArchitecture = createServerFn({ method: "POST" })
+  .inputValidator((d) => guildInput.extend({ prompt: z.string().trim().min(3).max(500) }).parse(d))
+  .handler(async ({ data }): Promise<Architecture> => {
+    const { requireGuildAdmin } = await import("./argus.server");
+    const { generateWithGemini } = await import("./ai.server");
+    await requireGuildAdmin(data.guildId);
+    return generateWithGemini(data.prompt);
+  });
+
+export const applyArchitecture = createServerFn({ method: "POST" })
+  .inputValidator((d) => guildInput.extend({ architecture: architectureSchema }).parse(d))
+  .handler(async ({ data }) => {
+    const { requireGuildAdmin, botApi } = await import("./argus.server");
+    const { session } = await requireGuildAdmin(data.guildId);
+    return botApi<{ ok: boolean; message?: string }>(`/guilds/${data.guildId}/apply`, {
+      method: "POST",
+      body: JSON.stringify({ requestedBy: session.id, architecture: data.architecture }),
+    });
+  });
