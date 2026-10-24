@@ -38,6 +38,8 @@ function GuildLayout() {
         <Link to="/dashboard/$guildId" params={{ guildId }} activeOptions={{ exact: true }} className={tab} activeProps={active}>Overview</Link>
         <Link to="/dashboard/$guildId/aibuild" params={{ guildId }} className={tab} activeProps={active}>AI Build</Link>
         <Link to="/dashboard/$guildId/logs" params={{ guildId }} className={tab} activeProps={active}>Logs</Link>
+        <Link to="/dashboard/$guildId/automod" params={{ guildId }} className={tab} activeProps={active}>Auto-Mod</Link>
+        <Link to="/dashboard/$guildId/stats" params={{ guildId }} className={tab} activeProps={active}>Statistics</Link>
       </nav>
       <div className="mt-8">
         <Outlet />

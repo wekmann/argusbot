@@ -76,3 +76,38 @@ export const applyArchitecture = createServerFn({ method: "POST" })
       body: JSON.stringify({ requestedBy: session.id, architecture: data.architecture }),
     });
   });
+
+export const automodSchema = z.object({
+  enabled: z.boolean(),
+  bannedWords: z.array(z.string().trim().min(1).max(50)).max(200),
+  punishment: z.enum(["mute", "kick", "ban"]),
+});
+export type Automod = z.infer<typeof automodSchema>;
+export type GuildStats = {
+  messagesByHour: { hour: number; count: number }[];
+  members: { date: string; count: number }[];
+};
+
+export const getAutomod = createServerFn({ method: "GET" })
+  .inputValidator((d) => guildInput.parse(d))
+  .handler(async ({ data }) => {
+    const { requireGuildAdmin, botApi } = await import("./argus.server");
+    await requireGuildAdmin(data.guildId);
+    return botApi<Automod>(`/guilds/${data.guildId}/automod`);
+  });
+
+export const saveAutomod = createServerFn({ method: "POST" })
+  .inputValidator((d) => guildInput.extend({ automod: automodSchema }).parse(d))
+  .handler(async ({ data }) => {
+    const { requireGuildAdmin, botApi } = await import("./argus.server");
+    await requireGuildAdmin(data.guildId);
+    return botApi<Automod>(`/guilds/${data.guildId}/automod`, { method: "PUT", body: JSON.stringify(data.automod) });
+  });
+
+export const getGuildStats = createServerFn({ method: "GET" })
+  .inputValidator((d) => guildInput.parse(d))
+  .handler(async ({ data }) => {
+    const { requireGuildAdmin, botApi } = await import("./argus.server");
+    await requireGuildAdmin(data.guildId);
+    return botApi<GuildStats>(`/guilds/${data.guildId}/stats`);
+  });
