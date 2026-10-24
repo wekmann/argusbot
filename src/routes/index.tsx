@@ -53,7 +53,7 @@ function Index() {
         </div>
         <div className="relative mx-auto w-full max-w-sm">
           <div className="absolute inset-0 rounded-full bg-gold/20 blur-3xl" />
-          <img src={"/argus-logo.png"} alt="Argus all-seeing eye" className="animate-slow-spin relative w-full rounded-full" />
+          <img src={"/favicon.png"} alt="Argus all-seeing eye" className="animate-slow-spin relative w-full rounded-full" />
         </div>
       </section>
 

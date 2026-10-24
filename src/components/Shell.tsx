@@ -7,7 +7,7 @@ import { t } from "@/lib/i18n";
 export const meQuery = { queryKey: ["me"], queryFn: () => getMe(), staleTime: 60_000 };
 
 export function avatarUrl(u: { id: string; avatar: string | null }) {
-  return u.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=64` : "/argus-logo.png";
+  return u.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=64` : "/favicon.png";
 }
 
 export function Shell({ children }: { children: ReactNode }) {
@@ -17,7 +17,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-30 border-b border-border bg-background/60 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
           <Link to="/" className="flex items-center gap-3">
-            <img src={"/argus-logo.png"} alt="Argus logo" className="h-9 w-9 rounded-full" />
+            <img src={"/favicon.png"} alt="Argus logo" className="h-9 w-9 rounded-full" />
             <span className="font-display text-lg font-bold tracking-widest">{t.brand.toUpperCase()}</span>
           </Link>
           <nav className="flex items-center gap-3 text-sm">
