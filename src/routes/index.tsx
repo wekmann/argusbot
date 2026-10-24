@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { Activity, RefreshCw, Server, Timer, User } from "lucide-react";
@@ -48,7 +48,7 @@ function Index() {
           <p className="mt-6 max-w-xl text-lg text-muted-foreground">{t.heroText}</p>
           <div className="mt-10 flex flex-wrap gap-4">
             <a href="/api/auth/login" className="btn-gold rounded-xl px-8 py-4 text-lg">{t.login}</a>
-            <a href="#status" className="btn-ghost rounded-xl px-8 py-4 text-lg">{t.status}</a>
+            <Link to="/status" className="btn-ghost rounded-xl px-8 py-4 text-lg">{t.status}</Link>
           </div>
         </div>
         <div className="relative mx-auto w-full max-w-sm">
@@ -60,13 +60,16 @@ function Index() {
       <section id="status" className="mx-auto max-w-6xl px-5 pb-24">
         <div className="glass p-6 md:p-8">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">{t.status}</h2>
+            <h2 className="text-2xl font-bold">
+  <Link to="/status" className="hover:text-gold">{t.status}</Link>
+</h2>
             <button onClick={() => status.refetch()} disabled={status.isFetching} className="btn-ghost flex items-center gap-2 rounded-xl px-4 py-2 text-sm">
               <RefreshCw className={`h-4 w-4 ${status.isFetching ? "animate-spin" : ""}`} /> {t.refresh}
             </button>
           </div>
           {status.data && !status.data.ok && <p className="mt-4 text-sm text-destructive">{status.data.error} <span className="opacity-70">({status.data.code})</span></p>}
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Link to="/status" className="mt-5 inline-block text-sm text-gold hover:underline">More details →</Link>
             <Stat icon={Activity} label="Status" value={s ? (s.online ? "ONLINE" : "OFFLINE") : "—"} accent={s?.online ? "text-success" : "text-destructive"} />
             <Stat icon={User} label="Bot Username" value={s?.username ?? "—"} />
             <Stat icon={Server} label="Servers" value={s ? s.guilds.toLocaleString() : "—"} />

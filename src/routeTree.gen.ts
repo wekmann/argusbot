@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ServersRouteImport } from './routes/servers'
+import { Route as StatusRouteImport } from './routes/status'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as DashboardGuildIdRouteImport } from './routes/dashboard.$guildId'
@@ -37,6 +38,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const ServersRoute = ServersRouteImport.update({
   id: '/servers',
   path: '/servers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatusRoute = StatusRouteImport.update({
+  id: '/status',
+  path: '/status',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/servers': typeof ServersRoute
+  '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/dashboard/$guildId': typeof DashboardGuildIdRouteWithChildren
   '/dashboard/': typeof DashboardIndexRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/servers': typeof ServersRoute
+  '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/dashboard': typeof DashboardIndexRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/servers': typeof ServersRoute
+  '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/dashboard/$guildId': typeof DashboardGuildIdRouteWithChildren
   '/dashboard/': typeof DashboardIndexRoute
@@ -149,6 +158,7 @@ export interface FileRouteTypes {
     | '/'
     | '/privacy'
     | '/servers'
+    | '/status'
     | '/terms'
     | '/dashboard/$guildId'
     | '/dashboard/'
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/'
     | '/privacy'
     | '/servers'
+    | '/status'
     | '/terms'
     | '/dashboard'
     | '/api/auth/login'
@@ -180,6 +191,7 @@ export interface FileRouteTypes {
     | '/'
     | '/privacy'
     | '/servers'
+    | '/status'
     | '/terms'
     | '/dashboard/$guildId'
     | '/dashboard/'
@@ -197,6 +209,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PrivacyRoute: typeof PrivacyRoute
   ServersRoute: typeof ServersRoute
+  StatusRoute: typeof StatusRoute
   TermsRoute: typeof TermsRoute
   DashboardGuildIdRoute: typeof DashboardGuildIdRouteWithChildren
   DashboardIndexRoute: typeof DashboardIndexRoute
@@ -226,6 +239,13 @@ declare module '@tanstack/react-router' {
       path: '/servers'
       fullPath: '/servers'
       preLoaderRoute: typeof ServersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/status': {
+      id: '/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof StatusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -331,6 +351,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PrivacyRoute: PrivacyRoute,
   ServersRoute: ServersRoute,
+  StatusRoute: StatusRoute,
   TermsRoute: TermsRoute,
   DashboardGuildIdRoute: DashboardGuildIdRouteWithChildren,
   DashboardIndexRoute: DashboardIndexRoute,

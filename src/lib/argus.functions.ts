@@ -2,8 +2,24 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { architectureSchema, type Architecture } from "./architecture";
 
-export type BotStatus = { online: boolean; username: string; guilds: number; uptimeSeconds: number };
-export type ModLog = { id: string; action: string; target: string; moderator: string; reason: string | null; createdAt: string };
+export type BotStatus = {
+  online: boolean;
+  username: string;
+  guilds: number;
+  uptimeSeconds: number;
+  id?: string | null;
+  avatar?: string | null;
+  ping?: number | null;
+  users?: number;
+  channels?: number;
+  commands?: number;
+  prefix?: string;
+  memoryMb?: number;
+  nodeVersion?: string;
+  discordJsVersion?: string;
+  startedAt?: string | null;
+  checkedAt?: string;
+};export type ModLog = { id: string; action: string; target: string; moderator: string; reason: string | null; createdAt: string };
 
 export const getMe = createServerFn({ method: "GET" }).handler(async () => {
   const { currentSession } = await import("./argus.server");
