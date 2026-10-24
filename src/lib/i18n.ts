@@ -27,4 +27,6 @@ export const t = {
   privacy: "Privacy Policy",
   terms: "Terms of Service",
   loginError: "Discord login failed. Please try again.",
+  overview: "Overview",
+  tickets: "Tickets & transcripts",
 };

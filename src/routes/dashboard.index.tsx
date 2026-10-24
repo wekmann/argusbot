@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { ChevronRight, Search } from "lucide-react";
 import { LoginGate, Shell } from "@/components/Shell";
+import { Reveal, Skeleton, Spotlight } from "@/components/motion";
 import { getAdminGuilds } from "@/lib/argus.functions";
 import { t } from "@/lib/i18n";
 
@@ -26,28 +29,69 @@ export const Route = createFileRoute("/dashboard/")({
 
 function Servers() {
   const q = useQuery({ queryKey: ["guilds"], queryFn: () => getAdminGuilds(), staleTime: 60_000 });
+  const [search, setSearch] = useState("");
+  const list = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    return (q.data ?? [])
+      .filter((g) => !needle || g.name.toLowerCase().includes(needle))
+      // servers where Argus is active first
+      .sort((a, b) => Number(b.botPresent === true) - Number(a.botPresent === true) || a.name.localeCompare(b.name));
+  }, [q.data, search]);
+
   return (
-    <div className="mx-auto max-w-6xl px-5 py-12">
-      <h1 className="text-4xl font-bold">{t.servers}</h1>
-      <p className="mt-2 text-muted-foreground">{t.serversHint}</p>
-      {q.isLoading && <p className="mt-10 text-muted-foreground">Loading servers…</p>}
+    <div className="mx-auto max-w-7xl px-5 py-12">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-black">{t.servers}</h1>
+          <p className="mt-2 text-muted-foreground">{t.serversHint}</p>
+        </div>
+        {(q.data?.length ?? 0) > 6 && (
+          <label className="relative block w-full sm:w-72">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search servers…"
+              className="w-full rounded-xl border border-border bg-input/30 py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-gold"
+            />
+          </label>
+        )}
+      </div>
+
       {q.error && <p className="mt-10 text-destructive">Couldn't load servers: {q.error.message}</p>}
       {q.data?.length === 0 && <p className="mt-10 text-muted-foreground">No servers with admin permissions found.</p>}
+      {q.data && q.data.length > 0 && list.length === 0 && <p className="mt-10 text-muted-foreground">Nothing matches “{search}”.</p>}
+
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {q.data?.map((g) => (
-          <Link key={g.id} to="/dashboard/$guildId" params={{ guildId: g.id }} className="glass group flex items-center gap-4 p-5 transition hover:border-gold">
-            {g.icon ? (
-              <img src={`https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=96`} alt="" className="h-14 w-14 rounded-xl" />
-            ) : (
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gold-soft font-display text-xl text-gold">{g.name[0]}</div>
-            )}
-            <div className="min-w-0">
-              <p className="truncate font-semibold group-hover:text-gold">{g.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {g.botPresent === null ? "Manage" : g.botPresent ? "Argus is active" : "Argus not added yet"}
-              </p>
+        {q.isLoading &&
+          Array.from({ length: 6 }, (_, i) => (
+            <div key={i} className="glass flex items-center gap-4 p-5">
+              <Skeleton className="h-14 w-14 !rounded-xl" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
             </div>
-          </Link>
+          ))}
+
+        {list.map((g, i) => (
+          <Reveal key={g.id} delay={Math.min(i, 8) * 50}>
+            <Spotlight as={Link} to="/dashboard/$guildId" params={{ guildId: g.id }} className="group flex items-center gap-4 p-5">
+              {g.icon ? (
+                <img src={`https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=96`} alt="" width={56} height={56} loading="lazy" className="h-14 w-14 rounded-xl ring-1 ring-border transition group-hover:ring-gold/60" />
+              ) : (
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gold-soft font-display text-xl text-gold">{g.name[0]}</div>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-semibold transition group-hover:text-gold">{g.name}</p>
+                <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className={`h-1.5 w-1.5 rounded-full ${g.botPresent ? "bg-success" : g.botPresent === false ? "bg-muted-foreground/50" : "bg-warning"}`} />
+                  {g.botPresent === null ? "Manage" : g.botPresent ? "Argus is active" : "Argus not added yet"}
+                </p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-gold" />
+            </Spotlight>
+          </Reveal>
         ))}
       </div>
     </div>

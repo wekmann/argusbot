@@ -1,6 +1,8 @@
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft, BarChart3, LayoutDashboard, ScrollText, ShieldCheck, Sparkles } from "lucide-react";
 import { LoginGate, Shell } from "@/components/Shell";
+import { Skeleton } from "@/components/motion";
 import { getGuild } from "@/lib/argus.functions";
 import { t } from "@/lib/i18n";
 
@@ -16,7 +18,7 @@ export const Route = createFileRoute("/dashboard/$guildId")({
     ],
   }),
   component: () => (
-    <Shell>
+    <Shell bare>
       <LoginGate>
         <GuildLayout />
       </LoginGate>
@@ -26,22 +28,71 @@ export const Route = createFileRoute("/dashboard/$guildId")({
 
 function GuildLayout() {
   const { guildId } = Route.useParams();
-  const q = useQuery({ queryKey: ["guild", guildId], queryFn: () => getGuild({ data: { guildId } }) });
-  const tab = "rounded-xl px-4 py-2 text-sm text-muted-foreground hover:text-foreground";
-  const active = { className: "rounded-xl px-4 py-2 text-sm bg-gold-soft text-gold" };
-  if (q.error) return <p className="p-20 text-center text-destructive">You don't have access to this server.</p>;
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const q = useQuery({ queryKey: ["guild", guildId], queryFn: () => getGuild({ data: { guildId } }), staleTime: 5 * 60_000, retry: false });
+
+  if (q.error)
+    return (
+      <div className="mx-auto max-w-md px-5 py-24 text-center">
+        <div className="glass p-10">
+          <h2 className="text-xl font-bold">No access</h2>
+          <p className="mt-2 text-sm text-muted-foreground">You don't have access to this server, or Argus isn't on it.</p>
+          <Link to="/dashboard" className="btn-ghost mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm">
+            <ArrowLeft className="h-4 w-4" /> {t.servers}
+          </Link>
+        </div>
+      </div>
+    );
+
+  const nav = [
+    { to: "/dashboard/$guildId", label: t.overview, icon: LayoutDashboard, exact: true },
+    { to: "/dashboard/$guildId/stats", label: "Statistics", icon: BarChart3 },
+    { to: "/dashboard/$guildId/logs", label: "Logs", icon: ScrollText },
+    { to: "/dashboard/$guildId/automod", label: "Auto-Mod", icon: ShieldCheck },
+    { to: "/dashboard/$guildId/aibuild", label: "AI Build", icon: Sparkles },
+  ] as const;
+
   return (
-    <div className="mx-auto max-w-6xl px-5 py-10">
-      <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-gold">← {t.servers}</Link>
-      <h1 className="mt-3 text-4xl font-bold">{q.data?.name ?? "…"}</h1>
-      <nav className="glass mt-6 inline-flex gap-1 p-1">
-        <Link to="/dashboard/$guildId" params={{ guildId }} activeOptions={{ exact: true }} className={tab} activeProps={active}>Overview</Link>
-        <Link to="/dashboard/$guildId/aibuild" params={{ guildId }} className={tab} activeProps={active}>AI Build</Link>
-        <Link to="/dashboard/$guildId/logs" params={{ guildId }} className={tab} activeProps={active}>Logs</Link>
-        <Link to="/dashboard/$guildId/automod" params={{ guildId }} className={tab} activeProps={active}>Auto-Mod</Link>
-        <Link to="/dashboard/$guildId/stats" params={{ guildId }} className={tab} activeProps={active}>Statistics</Link>
-      </nav>
-      <div className="mt-8">
+    <div className="mx-auto grid max-w-7xl gap-6 px-5 py-8 lg:grid-cols-[17rem_1fr] lg:gap-8 lg:py-10">
+      <aside className="lg:sticky lg:top-24 lg:self-start">
+        <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition hover:text-gold">
+          <ArrowLeft className="h-4 w-4" /> {t.servers}
+        </Link>
+
+        <div className="glass mt-4 flex items-center gap-3 p-3">
+          {q.data ? (
+            q.data.icon ? (
+              <img src={`https://cdn.discordapp.com/icons/${q.data.id}/${q.data.icon}.png?size=96`} alt="" width={48} height={48} className="h-12 w-12 rounded-xl ring-1 ring-gold/30" />
+            ) : (
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gold-soft font-display text-xl text-gold">{q.data.name[0]}</div>
+            )
+          ) : (
+            <Skeleton className="h-12 w-12" />
+          )}
+          <div className="min-w-0 flex-1">
+            {q.data ? <p className="truncate font-bold leading-tight">{q.data.name}</p> : <Skeleton className="h-5 w-32" />}
+            <p className="mt-0.5 text-xs text-muted-foreground">Server dashboard</p>
+          </div>
+        </div>
+
+        <nav className="-mx-5 mt-4 flex gap-1 overflow-x-auto px-5 pb-1 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0">
+          {nav.map((n) => (
+            <Link
+              key={n.to}
+              to={n.to}
+              params={{ guildId }}
+              activeOptions={{ exact: "exact" in n }}
+              className="flex shrink-0 items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-accent/60 hover:text-foreground"
+              activeProps={{ className: "nav-active" }}
+            >
+              <n.icon className="h-4 w-4" />
+              {n.label}
+            </Link>
+          ))}
+        </nav>
+      </aside>
+
+      <div key={pathname} className="page-in min-w-0">
         <Outlet />
       </div>
     </div>

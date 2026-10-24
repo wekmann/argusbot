@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Gavel, RotateCcw, Save, UserMinus, VolumeX, X } from "lucide-react";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/motion";
 import { Switch } from "@/components/ui/switch";
 import { getAutomod, saveAutomod, type Automod } from "@/lib/argus.functions";
 import { t } from "@/lib/i18n";
@@ -19,83 +20,124 @@ export const Route = createFileRoute("/dashboard/$guildId/automod")({
   component: AutomodPage,
 });
 
-const PUNISHMENTS: Automod["punishment"][] = ["mute", "kick", "ban"];
+const PUNISHMENTS = [
+  { id: "mute", label: "Mute", hint: "10-minute timeout", icon: VolumeX },
+  { id: "kick", label: "Kick", hint: "Remove from server", icon: UserMinus },
+  { id: "ban", label: "Ban", hint: "Permanent ban", icon: Gavel },
+] as const satisfies readonly { id: Automod["punishment"]; label: string; hint: string; icon: typeof Gavel }[];
+
+const EMPTY: Automod = { enabled: false, bannedWords: [], punishment: "mute" };
 
 function AutomodPage() {
   const { guildId } = Route.useParams();
+  const qc = useQueryClient();
   const q = useQuery({ queryKey: ["automod", guildId], queryFn: () => getAutomod({ data: { guildId } }), retry: false });
-  const [cfg, setCfg] = useState<Automod>({ enabled: false, bannedWords: [], punishment: "mute" });
+  const [cfg, setCfg] = useState<Automod>(EMPTY);
   const [word, setWord] = useState("");
   useEffect(() => { if (q.data) setCfg(q.data); }, [q.data]);
+
+  const saved = q.data ?? EMPTY;
+  const dirty = useMemo(() => JSON.stringify(cfg) !== JSON.stringify(saved), [cfg, saved]);
+
   const save = useMutation({
     mutationFn: () => saveAutomod({ data: { guildId, automod: cfg } }),
-    onSuccess: () => toast.success("Auto-moderation saved"),
+    onSuccess: (res) => {
+      toast.success("Auto-moderation saved");
+      qc.setQueryData(["automod", guildId], res);
+      qc.invalidateQueries({ queryKey: ["overview", guildId] });
+    },
     onError: (e) => toast.error(e.message),
   });
-  const addWord = () => {
-    const w = word.trim().toLowerCase();
-    if (w && !cfg.bannedWords.includes(w)) setCfg({ ...cfg, bannedWords: [...cfg.bannedWords, w] });
+
+  const addWords = () => {
+    const incoming = word.split(/[,\n]/).map((w) => w.trim().toLowerCase().slice(0, 50)).filter(Boolean);
+    if (incoming.length) {
+      const next = [...cfg.bannedWords];
+      for (const w of incoming) if (!next.includes(w) && next.length < 200) next.push(w);
+      setCfg({ ...cfg, bannedWords: next });
+    }
     setWord("");
   };
+  const idx = PUNISHMENTS.findIndex((p) => p.id === cfg.punishment);
 
   return (
-    <div className="glass space-y-8 p-6">
+    <div className="space-y-6 pb-24">
       {q.error && <p className="text-sm text-destructive">Couldn't load settings from the bot: {q.error.message}</p>}
-      <div className="flex items-center justify-between gap-4">
+
+      <section className="glass flex items-center justify-between gap-4 p-6">
         <div>
           <h2 className="text-xl font-bold">{t.automod}</h2>
-          <p className="text-sm text-muted-foreground">{t.automodHint}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t.automodHint}</p>
         </div>
         <div className="flex items-center gap-3">
-          <span className={`text-sm font-bold ${cfg.enabled ? "text-gold" : "text-muted-foreground"}`}>{cfg.enabled ? "ON" : "OFF"}</span>
-          <Switch checked={cfg.enabled} onCheckedChange={(v) => setCfg({ ...cfg, enabled: v })} />
+          <span className={`rounded-full px-3 py-1 text-xs font-bold ring-1 transition ${cfg.enabled ? "bg-success/15 text-success ring-success/30" : "bg-secondary text-muted-foreground ring-border"}`}>{cfg.enabled ? "ACTIVE" : "OFF"}</span>
+          <Switch checked={cfg.enabled} onCheckedChange={(v) => setCfg({ ...cfg, enabled: v })} aria-label="Toggle auto-moderation" />
         </div>
-      </div>
+      </section>
 
-      <div>
-        <h3 className="mb-2 text-sm font-semibold uppercase tracking-widest text-muted-foreground">{t.bannedWords}</h3>
+      <section className={`glass p-6 transition-opacity ${cfg.enabled ? "" : "opacity-60"}`}>
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">{t.bannedWords}</h3>
+          <span className="font-mono text-xs text-muted-foreground">{cfg.bannedWords.length}/200</span>
+        </div>
         <div className="flex gap-2">
           <input
             value={word}
-            maxLength={50}
+            maxLength={200}
             onChange={(e) => setWord(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addWord(); } }}
-            placeholder="Type a word and press Enter"
-            className="flex-1 rounded-xl border border-border bg-input/40 px-4 py-2 text-sm outline-none focus:border-gold"
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addWords(); } }}
+            placeholder="Type a word and press Enter (separate several with commas)"
+            className="flex-1 rounded-xl border border-border bg-input/30 px-4 py-2.5 text-sm outline-none transition focus:border-gold"
           />
-          <button onClick={addWord} className="btn-ghost rounded-xl px-4 py-2 text-sm">Add</button>
+          <button onClick={addWords} className="btn-ghost rounded-xl px-5 py-2 text-sm">Add</button>
         </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {cfg.bannedWords.length === 0 && <p className="text-sm text-muted-foreground">No banned words yet.</p>}
+        <div className="mt-4 flex min-h-10 flex-wrap gap-2">
+          {q.isLoading && <Skeleton className="h-8 w-48" />}
+          {!q.isLoading && cfg.bannedWords.length === 0 && <p className="text-sm text-muted-foreground">No banned words yet.</p>}
           {cfg.bannedWords.map((w) => (
-            <span key={w} className="flex items-center gap-1 rounded-full bg-gold-soft px-3 py-1 text-sm text-gold">
+            <span key={w} className="animate-pop-in flex items-center gap-1.5 rounded-full bg-gold-soft py-1 pl-3.5 pr-2 text-sm text-gold ring-1 ring-gold/20">
               {w}
-              <button aria-label={`Remove ${w}`} onClick={() => setCfg({ ...cfg, bannedWords: cfg.bannedWords.filter((x) => x !== w) })}>
+              <button aria-label={`Remove ${w}`} className="rounded-full p-0.5 transition hover:bg-gold/20" onClick={() => setCfg({ ...cfg, bannedWords: cfg.bannedWords.filter((x) => x !== w) })}>
                 <X className="h-3.5 w-3.5" />
               </button>
             </span>
           ))}
         </div>
-      </div>
+        {cfg.bannedWords.length > 0 && (
+          <button onClick={() => setCfg({ ...cfg, bannedWords: [] })} className="mt-4 text-xs text-muted-foreground transition hover:text-destructive">Clear all</button>
+        )}
+      </section>
 
-      <div>
-        <h3 className="mb-2 text-sm font-semibold uppercase tracking-widest text-muted-foreground">{t.punishment}</h3>
-        <div className="inline-flex gap-1 rounded-xl border border-border p-1">
+      <section className={`glass p-6 transition-opacity ${cfg.enabled ? "" : "opacity-60"}`}>
+        <h3 className="mb-4 text-sm font-semibold uppercase tracking-widest text-muted-foreground">{t.punishment}</h3>
+        <div className="relative grid grid-cols-3 gap-1 rounded-2xl border border-border bg-secondary/30 p-1">
+          <span
+            aria-hidden
+            className="absolute inset-y-1 left-1 w-[calc((100%-0.5rem)/3)] rounded-xl bg-gold-soft ring-1 ring-gold/40 transition-transform duration-300 [transition-timing-function:var(--ease-out-expo)]"
+            style={{ transform: `translateX(calc(${Math.max(idx, 0)} * (100% + 0.25rem)))` }}
+          />
           {PUNISHMENTS.map((p) => (
-            <button
-              key={p}
-              onClick={() => setCfg({ ...cfg, punishment: p })}
-              className={`rounded-lg px-5 py-2 text-sm font-semibold capitalize ${cfg.punishment === p ? "bg-gold-soft text-gold" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              {p}
+            <button key={p.id} onClick={() => setCfg({ ...cfg, punishment: p.id })} className={`relative z-10 flex flex-col items-center gap-1 rounded-xl px-3 py-3.5 transition ${cfg.punishment === p.id ? "text-gold" : "text-muted-foreground hover:text-foreground"}`}>
+              <p.icon className="h-5 w-5" />
+              <span className="text-sm font-bold">{p.label}</span>
+              <span className="hidden text-[11px] opacity-70 sm:block">{p.hint}</span>
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
-      <button onClick={() => save.mutate()} disabled={save.isPending} className="btn-gold rounded-xl px-6 py-2.5 text-sm font-bold disabled:opacity-60">
-        {save.isPending ? "Saving…" : t.save}
-      </button>
+      {/* Save bar slides in only when something changed */}
+      <div className={`fixed inset-x-0 bottom-5 z-40 mx-auto w-[min(34rem,calc(100%-2rem))] transition-all duration-300 [transition-timing-function:var(--ease-out-expo)] ${dirty ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-8 opacity-0"}`}>
+        <div className="glass glass-blur flex items-center justify-between gap-3 border-gold/40 bg-popover/90 p-3 pl-5 shadow-2xl">
+          <span className="text-sm">You have unsaved changes</span>
+          <div className="flex gap-2">
+            <button onClick={() => setCfg(saved)} className="btn-ghost flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm"><RotateCcw className="h-4 w-4" /> Reset</button>
+            <button onClick={() => save.mutate()} disabled={save.isPending} className="btn-gold flex items-center gap-1.5 rounded-xl px-5 py-2 text-sm">
+              <Save className="h-4 w-4" /> {save.isPending ? "Saving…" : t.save}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

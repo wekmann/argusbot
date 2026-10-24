@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Hash, Megaphone, MessagesSquare, Sparkles, Volume2 } from "lucide-react";
 import { applyArchitecture, generateArchitecture } from "@/lib/argus.functions";
 import type { Architecture } from "@/lib/architecture";
+import { Skeleton } from "@/components/motion";
 import { t } from "@/lib/i18n";
 
 export const Route = createFileRoute("/dashboard/$guildId/aibuild")({
@@ -19,6 +20,11 @@ export const Route = createFileRoute("/dashboard/$guildId/aibuild")({
 });
 
 const MAX = 500;
+const EXAMPLES = [
+  "A Polish gaming community for Valorant and CS2 with tournaments, clips and voice lobbies",
+  "A study group for university students with subject channels and quiet voice rooms",
+  "A small art community with commissions, critique and a showcase gallery",
+];
 const icons = { text: Hash, voice: Volume2, announcement: Megaphone, forum: MessagesSquare };
 
 function AiBuild() {
@@ -38,9 +44,18 @@ function AiBuild() {
           maxLength={MAX}
           onChange={(e) => setPrompt(e.target.value.slice(0, MAX))}
           placeholder="e.g. A Polish gaming community for Valorant and CS2 with tournaments, clips and voice lobbies"
-          className="mt-4 h-48 w-full resize-none rounded-xl border border-input bg-background/60 p-4 text-sm outline-none focus:border-gold"
+          className="mt-4 h-48 w-full resize-none rounded-xl border border-input bg-background/60 p-4 text-sm outline-none transition focus:border-gold focus:shadow-[0_0_0_3px_oklch(0.8_0.15_75/0.15)]"
         />
-        <div className="mt-2 text-right font-mono text-xs text-muted-foreground">{prompt.length}/{MAX}</div>
+        <div className="mt-2 flex items-start justify-between gap-3">
+          <div className="flex flex-wrap gap-1.5">
+            {EXAMPLES.map((ex, i) => (
+              <button key={i} onClick={() => setPrompt(ex)} className="rounded-full border border-border bg-secondary/40 px-3 py-1 text-xs text-muted-foreground transition hover:border-gold/60 hover:text-gold">
+                Example {i + 1}
+              </button>
+            ))}
+          </div>
+          <span className="shrink-0 font-mono text-xs text-muted-foreground">{prompt.length}/{MAX}</span>
+        </div>
         <button
           onClick={() => gen.mutate(prompt)}
           disabled={gen.isPending || prompt.trim().length < 3}
@@ -63,11 +78,24 @@ function AiBuild() {
             ))}
           </div>
         </div>
-        {!arch && <p className="mt-10 text-center text-sm text-muted-foreground">Your generated structure will appear here.</p>}
-        {arch && view === "json" && (
+        {!arch && !gen.isPending && (
+          <div className="py-14 text-center">
+            <Sparkles className="mx-auto h-10 w-10 text-gold/50" />
+            <p className="mt-3 text-sm text-muted-foreground">Your generated structure will appear here.</p>
+          </div>
+        )}
+        {gen.isPending && (
+          <div className="mt-5 space-y-3">
+            {[70, 90, 55, 80, 65, 85].map((w, i) => (
+              <Skeleton key={i} className="h-7" style={{ width: `${w}%` }} />
+            ))}
+            <p className="pt-2 text-center text-xs text-muted-foreground">Designing your server…</p>
+          </div>
+        )}
+        {arch && !gen.isPending && view === "json" && (
           <pre className="mt-4 max-h-[480px] overflow-auto rounded-xl bg-background/70 p-4 font-mono text-xs">{JSON.stringify(arch, null, 2)}</pre>
         )}
-        {arch && view === "visual" && (
+        {arch && !gen.isPending && view === "visual" && (
           <div className="mt-4 max-h-[480px] space-y-5 overflow-auto pr-2">
             <div>
               <p className="text-xs uppercase tracking-widest text-muted-foreground">Roles</p>
@@ -80,8 +108,8 @@ function AiBuild() {
                 ))}
               </div>
             </div>
-            {arch.categories.map((c) => (
-              <div key={c.name}>
+            {arch.categories.map((c, ci) => (
+              <div key={c.name} className="row-in" style={{ animationDelay: `${ci * 70}ms` }}>
                 <p className="text-xs font-bold uppercase tracking-widest text-gold">{c.name}</p>
                 <ul className="mt-1 space-y-1">
                   {c.channels.map((ch) => {
@@ -97,7 +125,7 @@ function AiBuild() {
             ))}
           </div>
         )}
-        {arch && (
+        {arch && !gen.isPending && (
           <div className="mt-6 border-t border-border pt-4">
             <button
               onClick={() => {

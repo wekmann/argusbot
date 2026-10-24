@@ -123,6 +123,29 @@ export const saveAutomod = createServerFn({ method: "POST" })
     return botApi<Automod>(`/guilds/${data.guildId}/automod`, { method: "PUT", body: JSON.stringify(data.automod) });
   });
 
+export type GuildOverview = {
+  guild: { id: string; name: string; icon: string | null; memberCount: number; channelCount: number; roleCount: number; createdAt: string };
+  messages24h: number;
+  messagesByHour: { hour: number; count: number }[];
+  members: { date: string; count: number }[];
+  actions7d: number;
+  actions30d: number;
+  actionsTotal: number;
+  actionsByType: { action: string; count: number }[];
+  automod: { enabled: boolean; words: number; punishment: "mute" | "kick" | "ban" };
+  recent: ModLog[];
+  botPing: number | null;
+};
+
+/** One request to the bot for the whole dashboard overview. */
+export const getGuildOverview = createServerFn({ method: "GET" })
+  .inputValidator((d) => guildInput.parse(d))
+  .handler(async ({ data }) => {
+    const { requireGuildAdmin, botApi } = await import("./argus.server");
+    await requireGuildAdmin(data.guildId);
+    return botApi<GuildOverview>(`/guilds/${data.guildId}/overview`);
+  });
+
 export const getGuildStats = createServerFn({ method: "GET" })
   .inputValidator((d) => guildInput.parse(d))
   .handler(async ({ data }) => {

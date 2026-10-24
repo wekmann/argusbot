@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 import {
   Activity, Boxes, Clock, Cpu, Gauge, Hash, MemoryStick, RefreshCw, Server, Terminal, Users, Wifi,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { CountUp, Reveal, Skeleton, Spotlight } from "@/components/motion";
 import { getBotStatus } from "@/lib/argus.functions";
 import { t } from "@/lib/i18n";
 
@@ -40,14 +42,14 @@ function StatusPage() {
 
   return (
     <Shell>
-      <div className="mx-auto max-w-6xl px-5 py-12">
+      <div className="mx-auto max-w-7xl px-5 py-12">
         <Link to="/" className="text-sm text-muted-foreground hover:text-gold">← Home</Link>
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <img src={s?.avatar || "/favicon.png"} alt="Argus" className="h-16 w-16 rounded-full ring-2 ring-gold" />
+            <img src={s?.avatar || "/favicon.png"} alt="Argus" width={64} height={64} className="h-16 w-16 rounded-full ring-2 ring-gold shadow-[0_0_30px_-4px_oklch(0.8_0.15_75/0.6)]" />
             <div>
-              <h1 className="text-4xl font-black">{t.status}</h1>
+              <h1 className="text-4xl font-black text-gold-gradient">{t.status}</h1>
               <p className="mt-1 font-mono text-sm text-muted-foreground">{s?.username ?? dash}</p>
             </div>
           </div>
@@ -57,7 +59,7 @@ function StatusPage() {
                 s ? (s.online ? "border-success/40 bg-success/10 text-success" : "border-destructive/40 bg-destructive/10 text-destructive") : "border-border text-muted-foreground"
               }`}
             >
-              <span className={`h-2.5 w-2.5 rounded-full ${s ? (s.online ? "animate-pulse bg-success" : "bg-destructive") : "bg-muted-foreground"}`} />
+              <span className={`live-dot h-2.5 w-2.5 rounded-full ${s ? (s.online ? "bg-success" : "bg-destructive") : "bg-muted-foreground"}`} />
               {s ? (s.online ? "ONLINE" : "OFFLINE") : q.isLoading ? "CHECKING…" : "UNKNOWN"}
             </span>
             <button onClick={() => q.refetch()} disabled={q.isFetching} className="btn-ghost flex items-center gap-2 rounded-xl px-4 py-2 text-sm">
@@ -77,10 +79,10 @@ function StatusPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Card icon={Activity} label="Status" value={s ? (s.online ? "Online" : "Offline") : dash} accent={s?.online ? "text-success" : s ? "text-destructive" : ""} />
             <Card icon={Clock} label="Uptime" value={s ? formatUptime(s.uptimeSeconds) : dash} />
-            <Card icon={Wifi} label="Latency" value={s?.ping != null ? `${s.ping} ms` : dash} accent={s?.ping != null ? pingTone(s.ping) : ""} />
-            <Card icon={Server} label="Servers" value={s ? s.guilds.toLocaleString() : dash} />
-            <Card icon={Users} label="Members (all servers)" value={s?.users != null ? s.users.toLocaleString() : dash} />
-            <Card icon={Hash} label="Channels cached" value={s?.channels != null ? s.channels.toLocaleString() : dash} />
+            <Card icon={Wifi} label="Latency" value={s?.ping != null ? <><CountUp value={s.ping} /> ms</> : dash} accent={s?.ping != null ? pingTone(s.ping) : ""} bar={s?.ping != null ? Math.min(1, s.ping / 600) : undefined} loading={q.isLoading} />
+            <Card icon={Server} label="Servers" value={s ? <CountUp value={s.guilds} /> : dash} loading={q.isLoading} />
+            <Card icon={Users} label="Members (all servers)" value={s?.users != null ? <CountUp value={s.users} /> : dash} loading={q.isLoading} />
+            <Card icon={Hash} label="Channels cached" value={s?.channels != null ? <CountUp value={s.channels} /> : dash} loading={q.isLoading} />
             <Card icon={Terminal} label="Commands" value={s?.commands != null ? String(s.commands) : dash} />
             <Card icon={Gauge} label="Command prefix" value={s?.prefix ?? dash} />
           </div>
@@ -89,7 +91,7 @@ function StatusPage() {
         <section className="mt-10">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-muted-foreground">System</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card icon={MemoryStick} label="Memory" value={s?.memoryMb != null ? `${s.memoryMb} MB` : dash} />
+            <Card icon={MemoryStick} label="Memory" value={s?.memoryMb != null ? <><CountUp value={s.memoryMb} /> MB</> : dash} bar={s?.memoryMb != null ? Math.min(1, s.memoryMb / 512) : undefined} loading={q.isLoading} />
             <Card icon={Cpu} label="Node.js" value={s?.nodeVersion ?? dash} />
             <Card icon={Boxes} label="discord.js" value={s?.discordJsVersion ? `v${s.discordJsVersion}` : dash} />
             <Card icon={Clock} label="Online since" value={s?.startedAt ? new Date(s.startedAt).toLocaleString() : dash} small />
@@ -107,14 +109,25 @@ function StatusPage() {
 }
 
 function Card({
-  icon: Icon, label, value, accent, small,
-}: { icon: typeof Activity; label: string; value: string; accent?: string; small?: boolean }) {
+  icon: Icon, label, value, accent, small, bar, loading,
+}: { icon: typeof Activity; label: string; value: ReactNode; accent?: string; small?: boolean; bar?: number; loading?: boolean }) {
   return (
-    <div className="rounded-xl border border-border bg-secondary/40 p-5">
-      <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
-        <Icon className="h-4 w-4 text-gold" /> {label}
-      </div>
-      <p className={`mt-2 truncate font-mono font-bold ${small ? "text-base" : "text-xl"} ${accent ?? ""}`}>{value}</p>
-    </div>
+    <Reveal>
+      <Spotlight className="p-5">
+        <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
+          <Icon className="h-4 w-4 text-gold" /> {label}
+        </div>
+        {loading ? (
+          <Skeleton className="mt-3 h-7 w-24" />
+        ) : (
+          <p className={`mt-2 truncate font-mono font-bold tabular-nums ${small ? "text-base" : "text-xl"} ${accent ?? ""}`}>{value}</p>
+        )}
+        {bar != null && (
+          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-secondary">
+            <div className="bar-fill h-full rounded-full bg-gradient-to-r from-gold to-warning" style={{ width: `${Math.max(3, bar * 100)}%` }} />
+          </div>
+        )}
+      </Spotlight>
+    </Reveal>
   );
 }

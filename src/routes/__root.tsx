@@ -79,6 +79,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "theme-color", content: "#0d1020" },
       { title: "Argus — Discord Moderation" },
       { name: "description", content: "Argus by Argus Studio — the all-seeing Discord moderation bot." },
       { name: "author", content: "Argus Studio" },
@@ -94,7 +95,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Manrope:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Manrope:wght@400..800&family=JetBrains+Mono:wght@400;600&display=swap",
       },
     ],
   }),
@@ -111,6 +112,10 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <div className="app-bg" aria-hidden>
+          <div className="aurora aurora-a" />
+          <div className="aurora aurora-b" />
+        </div>
         {children}
         <Scripts />
       </body>
