@@ -65,7 +65,7 @@ function Index() {
               <RefreshCw className={`h-4 w-4 ${status.isFetching ? "animate-spin" : ""}`} /> {t.refresh}
             </button>
           </div>
-          {status.data && !status.data.ok && <p className="mt-4 text-sm text-destructive">{status.data.error}</p>}
+          {status.data && !status.data.ok && <p className="mt-4 text-sm text-destructive">{status.data.error} <span className="opacity-70">({status.data.code})</span></p>}
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Stat icon={Activity} label="Status" value={s ? (s.online ? "ONLINE" : "OFFLINE") : "—"} accent={s?.online ? "text-success" : "text-destructive"} />
             <Stat icon={User} label="Bot Username" value={s?.username ?? "—"} />

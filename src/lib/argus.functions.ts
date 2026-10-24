@@ -17,7 +17,10 @@ export const getBotStatus = createServerFn({ method: "GET" }).handler(async () =
     return { ok: true as const, status: await botApi<BotStatus>("/status") };
   } catch (e) {
     console.error(e);
-    return { ok: false as const, error: "Bot status is unavailable right now." };
+    // Short, non-sensitive reason shown on the page: not-configured | HTTP status (e.g. 401) | network
+    const msg = e instanceof Error ? e.message : String(e);
+    const code = /not configured/i.test(msg) ? "not-configured" : (msg.match(/\[(\d{3})\]/)?.[1] ?? "network");
+    return { ok: false as const, error: "Bot status is unavailable right now.", code };
   }
 });
 
