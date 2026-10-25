@@ -5,6 +5,7 @@ import { Hash, Megaphone, MessagesSquare, Sparkles, Volume2 } from "lucide-react
 import { applyArchitecture, generateArchitecture } from "@/lib/argus.functions";
 import type { Architecture } from "@/lib/architecture";
 import { Skeleton } from "@/components/motion";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { t } from "@/lib/i18n";
 
 export const Route = createFileRoute("/dashboard/$guildId/aibuild")({
@@ -34,6 +35,7 @@ function AiBuild() {
   const gen = useMutation({ mutationFn: (p: string) => generateArchitecture({ data: { guildId, prompt: p } }) });
   const apply = useMutation({ mutationFn: (a: Architecture) => applyArchitecture({ data: { guildId, architecture: a } }) });
   const arch = gen.data;
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
@@ -128,9 +130,7 @@ function AiBuild() {
         {arch && !gen.isPending && (
           <div className="mt-6 border-t border-border pt-4">
             <button
-              onClick={() => {
-                if (confirm("Apply this structure to the server? Argus will create these roles and channels.")) apply.mutate(arch);
-              }}
+              onClick={() => setConfirmOpen(true)}
               disabled={apply.isPending}
               className="btn-gold w-full rounded-xl px-6 py-3"
             >
@@ -138,6 +138,18 @@ function AiBuild() {
             </button>
             {apply.data && <p className="mt-3 text-sm text-success">{apply.data.message ?? "Structure applied."}</p>}
             {apply.error && <p className="mt-3 text-sm text-destructive">{apply.error.message}</p>}
+            <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Apply this structure?</AlertDialogTitle>
+                  <AlertDialogDescription>Argus will create these roles and channels on your server. Existing channels are not deleted.</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => apply.mutate(arch)}>{t.apply}</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         )}
       </div>

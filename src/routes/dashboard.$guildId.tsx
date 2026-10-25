@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, BarChart3, LayoutDashboard, PartyPopper, Plus, ScrollText, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowLeft, BarChart3, LayoutDashboard, PartyPopper, Plus, ScrollText, ShieldCheck, Sparkles, Ticket } from "lucide-react";
 import { useBotInvite } from "@/components/InviteBot";
 import { LoginGate, Shell } from "@/components/Shell";
 import { Skeleton } from "@/components/motion";
@@ -73,6 +73,7 @@ function GuildLayout() {
     { to: "/dashboard/$guildId/logs", label: "Logs", icon: ScrollText },
     { to: "/dashboard/$guildId/automod", label: "Auto-Mod", icon: ShieldCheck },
     { to: "/dashboard/$guildId/welcome", label: "Welcome", icon: PartyPopper },
+    { to: "/dashboard/$guildId/tickets", label: "Tickets", icon: Ticket },
     { to: "/dashboard/$guildId/aibuild", label: "AI Build", icon: Sparkles },
   ] as const;
 

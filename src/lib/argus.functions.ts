@@ -225,3 +225,133 @@ export const getGuildStats = createServerFn({ method: "GET" })
     await requireGuildAdmin(data.guildId);
     return botApi<GuildStats>(`/guilds/${data.guildId}/stats`);
   });
+
+// ---------------------------------------------------------------------------
+// Tickets (per-server configuration, rating and transcripts)
+// The bot double-checks that this user is the owner / an Administrator of the server.
+// ---------------------------------------------------------------------------
+
+const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/);
+const roleId = z.string().regex(/^\d{17,20}$/);
+
+export const ticketSettingsSchema = z.object({
+  enabled: z.boolean(),
+  panelChannelId: snowflake,
+  categoryId: snowflake,
+  logChannelId: snowflake,
+  supportRoleIds: z.array(roleId).max(10),
+  inactivityHours: z.number().min(0).max(720),
+  graceHours: z.number().min(1).max(168),
+  panel: z.object({
+    title: z.string().max(256),
+    description: z.string().max(4000),
+    color: hexColor,
+    footer: z.string().max(2048),
+    image: z.string().max(500),
+    thumbnail: z.string().max(500),
+    buttonLabel: z.string().trim().min(1).max(80),
+    buttonEmoji: z.string().max(64),
+  }),
+  welcome: z.object({
+    title: z.string().max(256),
+    description: z.string().max(4000),
+    color: hexColor,
+    image: z.string().max(500),
+    pingSupport: z.boolean(),
+  }),
+});
+export type TicketSettings = z.infer<typeof ticketSettingsSchema> & { panelMessage?: { channelId: string; messageId: string } | null };
+
+export type TicketConfig = {
+  settings: TicketSettings;
+  problems: string[];
+  channels: { id: string; name: string; category: string | null; canSend: boolean }[];
+  categories: { id: string; name: string; canManage: boolean }[];
+  roles: { id: string; name: string; color: string | null }[];
+};
+export type TicketRating = { count: number; average: number | null; distribution: Record<"1" | "2" | "3" | "4" | "5", number> };
+export type TicketTranscriptRow = {
+  id: string;
+  channelName: string;
+  ownerId: string;
+  ownerTag: string | null;
+  closedById: string | null;
+  closedByTag: string | null;
+  closeReason: string | null;
+  openedAt: string | null;
+  closedAt: string;
+  messageCount: number;
+  rating: number | null;
+};
+export type TicketTranscriptList = { total: number; limit: number; offset: number; transcripts: TicketTranscriptRow[] };
+export type TicketMessage = {
+  id: string;
+  author: string;
+  bot: boolean;
+  avatar: string;
+  content: string;
+  at: string;
+  attachments: { name: string; url: string; type: string | null }[];
+  embeds: { title: string | null; description: string | null }[];
+};
+export type TicketTranscript = TicketTranscriptRow & { guildName: string | null; messageCount: number; messages: TicketMessage[] };
+
+export const getTicketConfig = createServerFn({ method: "GET" })
+  .inputValidator((d) => guildInput.parse(d))
+  .handler(async ({ data }) => {
+    const { requireGuildAdmin, botApi } = await import("./argus.server");
+    const { session } = await requireGuildAdmin(data.guildId);
+    return botApi<TicketConfig>(`/guilds/${data.guildId}/tickets`, { headers: { "X-Discord-User-Id": session.id } });
+  });
+
+export const saveTicketConfig = createServerFn({ method: "POST" })
+  .inputValidator((d) => guildInput.extend({ settings: ticketSettingsSchema }).parse(d))
+  .handler(async ({ data }) => {
+    const { requireGuildAdmin, botApi } = await import("./argus.server");
+    const { session } = await requireGuildAdmin(data.guildId);
+    return botApi<{ settings: TicketSettings; problems: string[] }>(`/guilds/${data.guildId}/tickets`, {
+      method: "PUT",
+      headers: { "X-Discord-User-Id": session.id },
+      body: JSON.stringify(data.settings),
+    });
+  });
+
+/** Posts (or replaces) the ticket panel in the chosen channel. */
+export const sendTicketPanel = createServerFn({ method: "POST" })
+  .inputValidator((d) => guildInput.parse(d))
+  .handler(async ({ data }) => {
+    const { requireGuildAdmin, botApi } = await import("./argus.server");
+    const { session } = await requireGuildAdmin(data.guildId);
+    return botApi<{ channelId: string; messageId: string; url: string }>(`/guilds/${data.guildId}/tickets/panel`, {
+      method: "POST",
+      headers: { "X-Discord-User-Id": session.id },
+      body: "{}",
+    });
+  });
+
+/** Average rating of THIS server's tickets. */
+export const getTicketRating = createServerFn({ method: "GET" })
+  .inputValidator((d) => guildInput.parse(d))
+  .handler(async ({ data }) => {
+    const { requireGuildAdmin, botApi } = await import("./argus.server");
+    const { session } = await requireGuildAdmin(data.guildId);
+    return botApi<TicketRating>(`/guilds/${data.guildId}/tickets/rating`, { headers: { "X-Discord-User-Id": session.id } });
+  });
+
+export const getTicketTranscripts = createServerFn({ method: "GET" })
+  .inputValidator((d) => guildInput.extend({ offset: z.number().int().min(0).max(100000).default(0), q: z.string().max(100).default("") }).parse(d))
+  .handler(async ({ data }) => {
+    const { requireGuildAdmin, botApi } = await import("./argus.server");
+    const { session } = await requireGuildAdmin(data.guildId);
+    const qs = new URLSearchParams({ limit: "25", offset: String(data.offset) });
+    if (data.q.trim()) qs.set("q", data.q.trim());
+    return botApi<TicketTranscriptList>(`/guilds/${data.guildId}/tickets/transcripts?${qs}`, { headers: { "X-Discord-User-Id": session.id } });
+  });
+
+export const getTicketTranscript = createServerFn({ method: "GET" })
+  .inputValidator((d) => guildInput.extend({ transcriptId: z.string().regex(/^[a-f0-9]{32}$/) }).parse(d))
+  .handler(async ({ data }) => {
+    const { requireGuildAdmin, botApi } = await import("./argus.server");
+    const { session } = await requireGuildAdmin(data.guildId);
+    return botApi<TicketTranscript>(`/guilds/${data.guildId}/tickets/transcripts/${data.transcriptId}`, { headers: { "X-Discord-User-Id": session.id } });
+  });

@@ -23,6 +23,7 @@ import { Route as DashboardGuildIdAibuildRouteImport } from './routes/dashboard.
 import { Route as DashboardGuildIdAutomodRouteImport } from './routes/dashboard.$guildId.automod'
 import { Route as DashboardGuildIdLogsRouteImport } from './routes/dashboard.$guildId.logs'
 import { Route as DashboardGuildIdStatsRouteImport } from './routes/dashboard.$guildId.stats'
+import { Route as DashboardGuildIdTicketsRouteImport } from './routes/dashboard.$guildId.tickets'
 import { Route as DashboardGuildIdWelcomeRouteImport } from './routes/dashboard.$guildId.welcome'
 import { Route as ApiAuthCallbackDiscordRouteImport } from './routes/api/auth/callback/discord'
 
@@ -96,6 +97,11 @@ const DashboardGuildIdStatsRoute = DashboardGuildIdStatsRouteImport.update({
   path: '/stats',
   getParentRoute: () => DashboardGuildIdRoute,
 } as any)
+const DashboardGuildIdTicketsRoute = DashboardGuildIdTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => DashboardGuildIdRoute,
+} as any)
 const DashboardGuildIdWelcomeRoute = DashboardGuildIdWelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/$guildId/automod': typeof DashboardGuildIdAutomodRoute
   '/dashboard/$guildId/logs': typeof DashboardGuildIdLogsRoute
   '/dashboard/$guildId/stats': typeof DashboardGuildIdStatsRoute
+  '/dashboard/$guildId/tickets': typeof DashboardGuildIdTicketsRoute
   '/dashboard/$guildId/welcome': typeof DashboardGuildIdWelcomeRoute
   '/dashboard/$guildId/': typeof DashboardGuildIdIndexRoute
   '/api/auth/callback/discord': typeof ApiAuthCallbackDiscordRoute
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/dashboard/$guildId/automod': typeof DashboardGuildIdAutomodRoute
   '/dashboard/$guildId/logs': typeof DashboardGuildIdLogsRoute
   '/dashboard/$guildId/stats': typeof DashboardGuildIdStatsRoute
+  '/dashboard/$guildId/tickets': typeof DashboardGuildIdTicketsRoute
   '/dashboard/$guildId/welcome': typeof DashboardGuildIdWelcomeRoute
   '/dashboard/$guildId': typeof DashboardGuildIdIndexRoute
   '/api/auth/callback/discord': typeof ApiAuthCallbackDiscordRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/dashboard/$guildId/automod': typeof DashboardGuildIdAutomodRoute
   '/dashboard/$guildId/logs': typeof DashboardGuildIdLogsRoute
   '/dashboard/$guildId/stats': typeof DashboardGuildIdStatsRoute
+  '/dashboard/$guildId/tickets': typeof DashboardGuildIdTicketsRoute
   '/dashboard/$guildId/welcome': typeof DashboardGuildIdWelcomeRoute
   '/dashboard/$guildId/': typeof DashboardGuildIdIndexRoute
   '/api/auth/callback/discord': typeof ApiAuthCallbackDiscordRoute
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/dashboard/$guildId/automod'
     | '/dashboard/$guildId/logs'
     | '/dashboard/$guildId/stats'
+    | '/dashboard/$guildId/tickets'
     | '/dashboard/$guildId/welcome'
     | '/dashboard/$guildId/'
     | '/api/auth/callback/discord'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/dashboard/$guildId/automod'
     | '/dashboard/$guildId/logs'
     | '/dashboard/$guildId/stats'
+    | '/dashboard/$guildId/tickets'
     | '/dashboard/$guildId/welcome'
     | '/dashboard/$guildId'
     | '/api/auth/callback/discord'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/dashboard/$guildId/automod'
     | '/dashboard/$guildId/logs'
     | '/dashboard/$guildId/stats'
+    | '/dashboard/$guildId/tickets'
     | '/dashboard/$guildId/welcome'
     | '/dashboard/$guildId/'
     | '/api/auth/callback/discord'
@@ -330,6 +342,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardGuildIdStatsRouteImport
       parentRoute: typeof DashboardGuildIdRoute
     }
+    '/dashboard/$guildId/tickets': {
+      id: '/dashboard/$guildId/tickets'
+      path: '/tickets'
+      fullPath: '/dashboard/$guildId/tickets'
+      preLoaderRoute: typeof DashboardGuildIdTicketsRouteImport
+      parentRoute: typeof DashboardGuildIdRoute
+    }
     '/dashboard/$guildId/welcome': {
       id: '/dashboard/$guildId/welcome'
       path: '/welcome'
@@ -352,6 +371,7 @@ interface DashboardGuildIdRouteChildren {
   DashboardGuildIdAutomodRoute: typeof DashboardGuildIdAutomodRoute
   DashboardGuildIdLogsRoute: typeof DashboardGuildIdLogsRoute
   DashboardGuildIdStatsRoute: typeof DashboardGuildIdStatsRoute
+  DashboardGuildIdTicketsRoute: typeof DashboardGuildIdTicketsRoute
   DashboardGuildIdWelcomeRoute: typeof DashboardGuildIdWelcomeRoute
   DashboardGuildIdIndexRoute: typeof DashboardGuildIdIndexRoute
 }
@@ -361,6 +381,7 @@ const DashboardGuildIdRouteChildren: DashboardGuildIdRouteChildren = {
   DashboardGuildIdAutomodRoute: DashboardGuildIdAutomodRoute,
   DashboardGuildIdLogsRoute: DashboardGuildIdLogsRoute,
   DashboardGuildIdStatsRoute: DashboardGuildIdStatsRoute,
+  DashboardGuildIdTicketsRoute: DashboardGuildIdTicketsRoute,
   DashboardGuildIdWelcomeRoute: DashboardGuildIdWelcomeRoute,
   DashboardGuildIdIndexRoute: DashboardGuildIdIndexRoute,
 }
