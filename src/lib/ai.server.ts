@@ -15,7 +15,7 @@ Write names and topics in the same language as the user's description.`;
 export async function generateWithGemini(prompt: string): Promise<Architecture> {
   const apiKey = process.env["GEMINI_API_KEY"];
   if (!apiKey) throw new Error("GEMINI_API_KEY is not configured");
-  const model = process.env["GEMINI_MODEL"] || "gemini-2.5-flash";
+  const model = process.env["GEMINI_MODEL"] || "gemini-3.5-flash";
 
   let res: Response;
   try {
@@ -35,6 +35,7 @@ export async function generateWithGemini(prompt: string): Promise<Architecture> 
 
   if (!res.ok) {
     console.error(`[AI] Gemini responded ${res.status}: ${(await res.text()).slice(0, 300)}`);
+    if (res.status === 404) throw new Error("This Gemini model is no longer available. Set GEMINI_MODEL to a current model (for example gemini-3.5-flash).");
     if (res.status === 429) throw new Error("Gemini is busy or your free quota is used up. Try again in a moment.");
     if (res.status === 400 || res.status === 401 || res.status === 403) throw new Error("Gemini rejected the API key. Check GEMINI_API_KEY on the server.");
     throw new Error("AI generation failed.");
