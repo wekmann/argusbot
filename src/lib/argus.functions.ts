@@ -132,6 +132,69 @@ export const saveAutomod = createServerFn({ method: "POST" })
     return botApi<Automod>(`/guilds/${data.guildId}/automod`, { method: "PUT", body: JSON.stringify(data.automod) });
   });
 
+const snowflake = z.string().regex(/^\d{17,20}$/).nullable();
+export const welcomeSchema = z.object({
+  autorole: z.object({ enabled: z.boolean(), roleId: snowflake }),
+  welcome: z.object({
+    enabled: z.boolean(),
+    channelId: snowflake,
+    message: z.string().max(2000),
+    embed: z.object({
+      enabled: z.boolean(),
+      title: z.string().max(256),
+      description: z.string().max(4000),
+      color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+      footer: z.string().max(2048),
+      thumbnail: z.boolean(),
+      image: z.string().max(500),
+    }),
+  }),
+  ghostPing: z.object({ enabled: z.boolean(), channelId: snowflake }),
+});
+export type WelcomeConfig = z.infer<typeof welcomeSchema>;
+
+export type GuildMeta = {
+  channels: { id: string; name: string; category: string | null; canSend: boolean }[];
+  roles: { id: string; name: string; color: string | null; assignable: boolean }[];
+};
+
+export const getWelcome = createServerFn({ method: "GET" })
+  .inputValidator((d) => guildInput.parse(d))
+  .handler(async ({ data }) => {
+    const { requireGuildAdmin, botApi } = await import("./argus.server");
+    await requireGuildAdmin(data.guildId);
+    return botApi<WelcomeConfig>(`/guilds/${data.guildId}/welcome`);
+  });
+
+export const saveWelcome = createServerFn({ method: "POST" })
+  .inputValidator((d) => guildInput.extend({ welcome: welcomeSchema }).parse(d))
+  .handler(async ({ data }) => {
+    const { requireGuildAdmin, botApi } = await import("./argus.server");
+    await requireGuildAdmin(data.guildId);
+    return botApi<WelcomeConfig>(`/guilds/${data.guildId}/welcome`, { method: "PUT", body: JSON.stringify(data.welcome) });
+  });
+
+/** Channels and roles of the server, for the pickers. */
+export const getGuildMeta = createServerFn({ method: "GET" })
+  .inputValidator((d) => guildInput.parse(d))
+  .handler(async ({ data }) => {
+    const { requireGuildAdmin, botApi } = await import("./argus.server");
+    await requireGuildAdmin(data.guildId);
+    return botApi<GuildMeta>(`/guilds/${data.guildId}/meta`);
+  });
+
+/** Plays the saved welcome message / ghost ping for the logged-in admin. */
+export const sendWelcomeTest = createServerFn({ method: "POST" })
+  .inputValidator((d) => guildInput.parse(d))
+  .handler(async ({ data }) => {
+    const { requireGuildAdmin, botApi } = await import("./argus.server");
+    const { session } = await requireGuildAdmin(data.guildId);
+    return botApi<{ welcome: boolean; ghostPing: boolean }>(`/guilds/${data.guildId}/welcome/test`, {
+      method: "POST",
+      body: JSON.stringify({ userId: session.id }),
+    });
+  });
+
 export type GuildOverview = {
   guild: { id: string; name: string; icon: string | null; memberCount: number; channelCount: number; roleCount: number; createdAt: string };
   messages24h: number;
