@@ -38,6 +38,11 @@ export const t = {
   addBotReopen: "Open Discord window",
   addBotTimeout: "Still not added. Open the Discord window again and confirm the invite.",
   cancel: "Cancel",
+  unsaved: "You have unsaved changes",
+  reset: "Reset",
+  saving: "Saving…",
+  addToServer: "Add to server",
+  learnMore: "Learn more",
   botNotOnServer: "Argus isn't on this server yet",
   botNotOnServerHint: "Add the bot to unlock the dashboard for this server.",
 };

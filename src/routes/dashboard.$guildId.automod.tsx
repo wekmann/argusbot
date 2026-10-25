@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Gavel, RotateCcw, Save, UserMinus, VolumeX, X } from "lucide-react";
+import { Gavel, UserMinus, VolumeX, X } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/motion";
+import { SaveBar } from "@/components/SaveBar";
 import { Switch } from "@/components/ui/switch";
 import { getAutomod, saveAutomod, type Automod } from "@/lib/argus.functions";
 import { t } from "@/lib/i18n";
@@ -61,7 +62,7 @@ function AutomodPage() {
   const idx = PUNISHMENTS.findIndex((p) => p.id === cfg.punishment);
 
   return (
-    <div className="space-y-6 pb-24">
+    <div className="space-y-6">
       {q.error && <p className="text-sm text-destructive">Couldn't load settings from the bot: {q.error.message}</p>}
 
       <section className="glass flex items-center justify-between gap-4 p-6">
@@ -126,18 +127,7 @@ function AutomodPage() {
         </div>
       </section>
 
-      {/* Save bar slides in only when something changed */}
-      <div className={`fixed inset-x-0 bottom-5 z-40 mx-auto w-[min(34rem,calc(100%-2rem))] transition-all duration-300 [transition-timing-function:var(--ease-out-expo)] ${dirty ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-8 opacity-0"}`}>
-        <div className="glass glass-blur flex items-center justify-between gap-3 border-gold/40 bg-popover/90 p-3 pl-5 shadow-2xl">
-          <span className="text-sm">You have unsaved changes</span>
-          <div className="flex gap-2">
-            <button onClick={() => setCfg(saved)} className="btn-ghost flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm"><RotateCcw className="h-4 w-4" /> Reset</button>
-            <button onClick={() => save.mutate()} disabled={save.isPending} className="btn-gold flex items-center gap-1.5 rounded-xl px-5 py-2 text-sm">
-              <Save className="h-4 w-4" /> {save.isPending ? "Saving…" : t.save}
-            </button>
-          </div>
-        </div>
-      </div>
+      <SaveBar dirty={dirty} saving={save.isPending} onSave={() => save.mutate()} onReset={() => setCfg(saved)} />
     </div>
   );
 }

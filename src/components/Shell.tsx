@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState, type ReactNode } from "react";
-import { LayoutDashboard, LogIn, LogOut } from "lucide-react";
+import { ArrowUp, LayoutDashboard, LogIn, LogOut, Plus } from "lucide-react";
 import { getMe } from "@/lib/argus.functions";
+import { botInviteUrl } from "@/lib/invite";
 import { t } from "@/lib/i18n";
 import { Skeleton } from "@/components/motion";
 
@@ -34,14 +35,25 @@ export function Shell({ children, bare = false }: { children: ReactNode; bare?: 
             <img src="/favicon.png" alt="Argus logo" width={36} height={36} className="h-9 w-9 rounded-full ring-1 ring-gold/40 transition duration-500 group-hover:rotate-[24deg] group-hover:ring-gold" />
             <span className="font-display text-lg font-bold tracking-[0.25em]">{t.brand.toUpperCase()}</span>
           </Link>
-          <nav className="flex items-center gap-2 text-sm sm:gap-3">
-            <Link to="/status" className="hidden rounded-lg px-3 py-2 text-muted-foreground transition hover:text-foreground sm:block" activeProps={{ className: "text-gold" }}>
+          <nav className="hidden items-center gap-1 text-sm md:flex">
+            <a href="/#features" className="rounded-lg px-3 py-2 text-muted-foreground transition hover:text-foreground">
+              Features
+            </a>
+            <a href="/#start" className="rounded-lg px-3 py-2 text-muted-foreground transition hover:text-foreground">
+              Get started
+            </a>
+            <Link to="/status" className="rounded-lg px-3 py-2 text-muted-foreground transition hover:text-foreground" activeProps={{ className: "text-gold" }}>
               {t.status}
             </Link>
+          </nav>
+          <div className="flex items-center gap-2 text-sm sm:gap-3">
+            <a href={botInviteUrl()} target="_blank" rel="noreferrer" className="btn-ghost hidden items-center gap-2 rounded-xl px-4 py-2 sm:flex">
+              <Plus className="h-4 w-4 text-gold" /> {t.addToServer}
+            </a>
             {me ? (
               <>
-                <Link to="/dashboard" className="btn-ghost flex items-center gap-2 rounded-xl px-4 py-2">
-                  <LayoutDashboard className="h-4 w-4 text-gold" />
+                <Link to="/dashboard" className="btn-gold flex items-center gap-2 rounded-xl px-4 py-2">
+                  <LayoutDashboard className="h-4 w-4" />
                   <span className="hidden sm:inline">{t.dashboard}</span>
                 </Link>
                 <img src={avatarUrl(me)} alt={me.username} title={me.username} width={32} height={32} className="h-8 w-8 rounded-full ring-1 ring-gold/70" />
@@ -54,16 +66,46 @@ export function Shell({ children, bare = false }: { children: ReactNode; bare?: 
                 <LogIn className="h-4 w-4" /> {t.login}
               </a>
             )}
-          </nav>
+          </div>
         </div>
       </header>
       <main className={`flex-1 ${bare ? "" : "page-in"}`}>{children}</main>
-      <footer className="border-t border-border/60">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-5 py-8 text-sm text-muted-foreground sm:flex-row">
-          <p>© {new Date().getFullYear()} {t.studio}. All rights reserved.</p>
-          <div className="flex gap-5">
-            <Link to="/privacy" className="transition hover:text-gold">{t.privacy}</Link>
-            <Link to="/terms" className="transition hover:text-gold">{t.terms}</Link>
+      <footer className="border-t border-border/60 bg-background/40">
+        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 md:grid-cols-[1.5fr_1fr_1fr]">
+          <div>
+            <Link to="/" className="inline-flex items-center gap-3">
+              <img src="/favicon.png" alt="" width={36} height={36} className="h-9 w-9 rounded-full ring-1 ring-gold/40" />
+              <span className="font-display text-lg font-bold tracking-[0.25em]">{t.brand.toUpperCase()}</span>
+            </Link>
+            <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">Auto-moderation, logs, tickets, welcomes and an AI server builder — managed from one dashboard.</p>
+            <a href={botInviteUrl()} target="_blank" rel="noreferrer" className="btn-gold mt-5 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm">
+              <Plus className="h-4 w-4" /> {t.addToServer}
+            </a>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-foreground">Product</p>
+            <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
+              <li><a href="/#features" className="transition hover:text-gold">Features</a></li>
+              <li><a href="/#start" className="transition hover:text-gold">Get started</a></li>
+              <li><Link to="/status" className="transition hover:text-gold">{t.status}</Link></li>
+              <li><Link to="/dashboard" className="transition hover:text-gold">{t.dashboard}</Link></li>
+            </ul>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-foreground">Legal</p>
+            <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
+              <li><Link to="/privacy" className="transition hover:text-gold">{t.privacy}</Link></li>
+              <li><Link to="/terms" className="transition hover:text-gold">{t.terms}</Link></li>
+            </ul>
+          </div>
+        </div>
+        <div className="border-t border-border/60">
+          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-5 py-6 text-xs text-muted-foreground sm:flex-row">
+            <p>© {new Date().getFullYear()} {t.studio}. All rights reserved.</p>
+            <p className="max-w-md text-center sm:text-right">Argus is an independent project and is not affiliated with or endorsed by Discord Inc.</p>
+            <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="inline-flex items-center gap-1.5 transition hover:text-gold">
+              <ArrowUp className="h-3.5 w-3.5" /> Back to top
+            </button>
           </div>
         </div>
       </footer>
