@@ -42,6 +42,9 @@ export function Shell({ children, bare = false }: { children: ReactNode; bare?: 
             <a href="/#start" className="rounded-lg px-3 py-2 text-muted-foreground transition hover:text-foreground">
               Get started
             </a>
+            <Link to="/templates" className="rounded-lg px-3 py-2 text-muted-foreground transition hover:text-foreground" activeProps={{ className: "text-gold" }}>
+               {t.templates}
+            </Link>
             <Link to="/status" className="rounded-lg px-3 py-2 text-muted-foreground transition hover:text-foreground" activeProps={{ className: "text-gold" }}>
               {t.status}
             </Link>
@@ -88,6 +91,7 @@ export function Shell({ children, bare = false }: { children: ReactNode; bare?: 
               <li><a href="/#features" className="transition hover:text-gold">Features</a></li>
               <li><a href="/#start" className="transition hover:text-gold">Get started</a></li>
               <li><Link to="/status" className="transition hover:text-gold">{t.status}</Link></li>
+              <li><Link to="/templates" className="transition hover:text-gold">{t.templates}</Link></li>
               <li><Link to="/dashboard" className="transition hover:text-gold">{t.dashboard}</Link></li>
             </ul>
           </div>

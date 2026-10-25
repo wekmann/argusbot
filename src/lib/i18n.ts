@@ -10,6 +10,7 @@ export const t = {
   dashboard: "Dashboard",
   logout: "Log out",
   status: "Live Status",
+  templates: "Templates",
   refresh: "Refresh",
   servers: "Your Servers",
   serversHint: "Servers where you have Administrator or Manage Server permission.",
