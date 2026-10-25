@@ -53,6 +53,8 @@ export const listTemplates = createServerFn({ method: "GET" })
     const p = new URLSearchParams({ sort: data.sort ?? "new", limit: "24", offset: String(data.offset ?? 0) });
     if (data.q?.trim()) p.set("q", data.q.trim());
     const { status, body } = await templatesBot<{ templates: TemplateItem[]; total: number }>(`?${p}`);
+    // 404 without JSON = the bot has no /templates route (yet): show "no templates" instead of an error.
+    if (status === 404 && !body) return { templates: [], total: 0 };
     if (status !== 200 || !body) throw new Error("Templates are unavailable right now.");
     return { templates: body.templates, total: body.total };
   });
@@ -87,7 +89,9 @@ export const addTemplate = createServerFn({ method: "POST" })
       body: JSON.stringify({ userId: s.id, username: s.username, avatar: s.avatar, link: data.link }),
     });
     if (status === 201 && body?.id) return { ok: true, id: body.id };
-    return { ok: false, error: botError(body), id: status === 409 ? body?.id : undefined };
+    if (status === 404 && !body) return { ok: false, error: "The bot has no Templates API yet - update the bot files and restart it." };
+    if (status === 401 || status === 503) return { ok: false, error: "The bot rejected the request - check that BOT_API_SECRET is the same on the site and the bot." };
+    return { ok: false, error: botError(body, `Something went wrong (bot answered ${status}).`), id: status === 409 ? body?.id : undefined };
   });
 
 /** Author or super-admin only - decided here on the server, never in the browser. */
