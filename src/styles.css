@@ -290,3 +290,9 @@ html, body { overflow-x: clip; }
 @media (max-width: 767px) {
   input, textarea, select { font-size: 16px !important; }
 }
+
+/* Single-column grids may never grow wider than the screen (long text/badges used to push cards off the right edge) */
+@layer base {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+}
+main, .glass { min-width: 0; max-width: 100%; }
