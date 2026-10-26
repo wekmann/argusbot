@@ -50,14 +50,14 @@ export function Shell({ children, bare = false }: { children: ReactNode; bare?: 
             </Link>
           </nav>
           <div className="flex items-center gap-2 text-sm sm:gap-3">
-            <a href={botInviteUrl()} target="_blank" rel="noreferrer" className="btn-ghost hidden items-center gap-2 rounded-xl px-4 py-2 sm:flex">
+            <a href={botInviteUrl()} target="_blank" rel="noreferrer" className="btn-ghost flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-2 text-xs sm:gap-2 sm:px-4 sm:text-sm">
               <Plus className="h-4 w-4 text-gold" /> {t.addToServer}
             </a>
             {me ? (
               <>
-                <Link to="/dashboard" className="btn-gold flex items-center gap-2 rounded-xl px-4 py-2">
-                  <LayoutDashboard className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t.dashboard}</span>
+                <Link to="/dashboard" className="btn-gold flex items-center gap-2 rounded-xl px-3 py-2 text-xs sm:px-4 sm:text-sm">
+                  <LayoutDashboard className="hidden h-4 w-4 sm:block" />
+                  <span>{t.dashboard}</span>
                 </Link>
                 <img src={avatarUrl(me)} alt={me.username} title={me.username} width={32} height={32} className="h-8 w-8 rounded-full ring-1 ring-gold/70" />
                 <a href="/api/auth/logout" className="rounded-lg p-2 text-muted-foreground transition hover:text-foreground" aria-label={t.logout} title={t.logout}>

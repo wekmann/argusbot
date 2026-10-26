@@ -121,7 +121,7 @@ function AutomodPage() {
             <button key={p.id} onClick={() => setCfg({ ...cfg, punishment: p.id })} className={`relative z-10 flex flex-col items-center gap-1 rounded-xl px-3 py-3.5 transition ${cfg.punishment === p.id ? "text-gold" : "text-muted-foreground hover:text-foreground"}`}>
               <p.icon className="h-5 w-5" />
               <span className="text-sm font-bold">{p.label}</span>
-              <span className="hidden text-[11px] opacity-70 sm:block">{p.hint}</span>
+              <span className="text-center text-[11px] leading-tight opacity-70">{p.hint}</span>
             </button>
           ))}
         </div>

@@ -26,7 +26,7 @@ function Logs() {
   const [type, setType] = useState<string>("all");
 
   const types = useMemo(() => {
-    const m = new Map<string, number>();
+    const m = new Map<string, number>([["automod", 0], ["kick", 0], ["ban", 0], ["purge", 0]]);
     for (const l of q.data ?? []) {
       const k = actionTone(l.action).key;
       m.set(k, (m.get(k) ?? 0) + 1);
@@ -75,7 +75,7 @@ function Logs() {
         </div>
       </div>
 
-      {types.length > 1 && (
+      {types.length > 0 && (
         <div className="flex flex-wrap gap-2 px-5 pb-4">
           {[["all", q.data?.length ?? 0] as const, ...types].map(([k, n]) => (
             <button
@@ -99,18 +99,18 @@ function Logs() {
       )}
       {rows.length > 0 && (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-sm">
+          <table className="w-full text-xs sm:min-w-[640px] sm:text-sm">
             <thead className="border-y border-border bg-secondary/40 text-left text-xs uppercase tracking-widest text-muted-foreground">
-              <tr><th className="px-5 py-3">Action</th><th className="px-5 py-3">Target</th><th className="px-5 py-3">Moderator</th><th className="px-5 py-3">Reason</th><th className="px-5 py-3">When</th></tr>
+              <tr><th className="px-2.5 py-3 sm:px-5">Action</th><th className="px-2.5 py-3 sm:px-5">Target</th><th className="px-2.5 py-3 sm:px-5">Moderator</th><th className="px-2.5 py-3 sm:px-5">Reason</th><th className="px-2.5 py-3 sm:px-5">When</th></tr>
             </thead>
             <tbody>
               {rows.map((l, i) => (
                 <tr key={l.id} className="row-in border-b border-border/40 transition hover:bg-accent/30" style={{ animationDelay: `${Math.min(i, 14) * 30}ms` }}>
-                  <td className="px-5 py-3"><ActionBadge action={l.action} /></td>
-                  <td className="px-5 py-3 font-medium">{l.target}</td>
-                  <td className="px-5 py-3 text-muted-foreground">{l.moderator}</td>
-                  <td className="max-w-xs truncate px-5 py-3 text-muted-foreground" title={l.reason ?? ""}>{l.reason ?? "—"}</td>
-                  <td className="whitespace-nowrap px-5 py-3 text-xs text-muted-foreground" title={new Date(l.createdAt).toLocaleString()}>{timeAgo(l.createdAt)}</td>
+                  <td className="px-2.5 py-3 sm:px-5"><ActionBadge action={l.action} /></td>
+                  <td className="px-2.5 py-3 sm:px-5 font-medium">{l.target}</td>
+                  <td className="px-2.5 py-3 sm:px-5 text-muted-foreground">{l.moderator}</td>
+                  <td className="max-w-[9rem] truncate sm:max-w-xs px-2.5 py-3 sm:px-5 text-muted-foreground" title={l.reason ?? ""}>{l.reason ?? "—"}</td>
+                  <td className="whitespace-nowrap px-2.5 py-3 sm:px-5 text-xs text-muted-foreground" title={new Date(l.createdAt).toLocaleString()}>{timeAgo(l.createdAt)}</td>
                 </tr>
               ))}
             </tbody>

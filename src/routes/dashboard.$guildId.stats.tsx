@@ -46,7 +46,7 @@ function Stats() {
       </div>
       {q.error && <p className="text-sm text-destructive">Couldn't load statistics from the bot: {q.error.message}</p>}
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <Mini icon={MessageSquare} label="Messages (24 h)" loading={q.isLoading} value={<CountUp value={total} />} />
         <Mini icon={Clock} label="Busiest hour" loading={q.isLoading} value={peak && peak.count > 0 ? peak.label : "—"} />
         <Mini icon={TrendingUp} label="Average / hour" loading={q.isLoading} value={<CountUp value={hours.length ? total / hours.length : 0} decimals={1} />} />
@@ -105,7 +105,7 @@ function Stats() {
 function Mini({ icon: Icon, label, value, loading }: { icon: typeof Users; label: string; value: ReactNode; loading?: boolean }) {
   return (
     <div className="glass p-5">
-      <div className="flex items-center justify-between text-xs uppercase tracking-widest text-muted-foreground">
+      <div className="flex items-center justify-between gap-1 text-[11px] uppercase tracking-wider text-muted-foreground sm:text-xs sm:tracking-widest">
         {label}
         <Icon className="h-4 w-4 text-gold" />
       </div>

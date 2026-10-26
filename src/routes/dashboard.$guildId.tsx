@@ -107,10 +107,9 @@ function GuildLayout() {
               to={n.to}
               params={{ guildId }}
               activeOptions={{ exact: "exact" in n }}
-              className="flex shrink-0 items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-accent/60 hover:text-foreground"
-              activeProps={{ className: "nav-active" }}
+              className="flex shrink-0 items-center gap-3 rounded-xl border border-transparent px-3 py-2 text-[13px] font-semibold text-muted-foreground transition hover:bg-accent/60 hover:text-foreground lg:px-4 lg:py-2.5 lg:text-sm lg:font-medium"              activeProps={{ className: "nav-active" }}
             >
-              <n.icon className="h-4 w-4" />
+              <n.icon className="hidden h-4 w-4 lg:block" />
               {n.label}
             </Link>
           ))}

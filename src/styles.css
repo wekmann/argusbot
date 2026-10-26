@@ -246,8 +246,8 @@ html:not(.js-motion) .reveal { opacity: 1; transform: none; }
 .live-dot::after { content: ""; position: absolute; inset: 0; border-radius: 9999px; background: inherit; animation: ping-soft 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
 
 /* Sidebar active marker */
-.nav-active { position: relative; background: linear-gradient(90deg, oklch(0.8 0.15 75 / 16%), transparent); color: var(--gold); }
-.nav-active::before { content: ""; position: absolute; left: 0; top: 18%; bottom: 18%; width: 3px; border-radius: 99px; background: var(--gradient-gold); box-shadow: 0 0 12px oklch(0.8 0.15 75 / 70%); animation: grow-y 0.35s var(--ease-out-expo) both; }
+.nav-active { position: relative; background: var(--gold-soft); border-color: oklch(0.8 0.15 75 / 35%); color: var(--gold); }
+.nav-active::before { display: none; content: ""; position: absolute; left: 0; top: 18%; bottom: 18%; width: 3px; border-radius: 99px; background: var(--gradient-gold); box-shadow: 0 0 12px oklch(0.8 0.15 75 / 70%); animation: grow-y 0.35s var(--ease-out-expo) both; }
 
 /* Progress bars / bars fill */
 .bar-fill { transform-origin: left; animation: grow-x 0.9s var(--ease-out-expo) both; animation-delay: var(--d, 0ms); }
@@ -279,3 +279,7 @@ html:not(.js-motion) .reveal { opacity: 1; transform: none; }
 @keyframes fade-in { to { opacity: 1; } }
 .bar-col { transform-origin: bottom; animation: grow-y 0.8s var(--ease-out-expo) both; animation-delay: var(--d, 0ms); }
 .row-in { animation: page-in 0.45s var(--ease-out-expo) both; animation-delay: var(--d, 0ms); }
+@media (min-width: 1024px) {
+  .nav-active { background: linear-gradient(90deg, oklch(0.8 0.15 75 / 16%), transparent); border-color: transparent; }
+  .nav-active::before { display: block; }
+}

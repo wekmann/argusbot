@@ -11,7 +11,7 @@ export function actionTone(action: string) {
 
 export function ActionBadge({ action }: { action: string }) {
   return (
-    <span className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide ring-1 ${actionTone(action).cls}`}>
+    <span className={`inline-flex rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ring-1 sm:whitespace-nowrap sm:rounded-full sm:px-2.5 sm:text-[11px] ${actionTone(action).cls}`}>
       {action}
     </span>
   );
