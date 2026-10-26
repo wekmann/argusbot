@@ -689,9 +689,9 @@ function TicketsPage() {
     <div className="space-y-6">
       <RatingCard guildId={guildId} />
 
-      <div role="tablist" aria-label="Tickets" className="glass inline-flex gap-1 p-1">
+      <div role="tablist" aria-label="Tickets" className="glass flex w-full gap-1 p-1 sm:inline-flex sm:w-auto">
         {tabs.map((x) => (
-          <button key={x.id} type="button" role="tab" aria-selected={tab === x.id} onClick={() => setTab(x.id)} className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition ${tab === x.id ? "bg-gold-soft text-gold" : "text-muted-foreground hover:text-foreground"}`}>
+          <button key={x.id} type="button" role="tab" aria-selected={tab === x.id} onClick={() => setTab(x.id)} className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition sm:flex-none ${tab === x.id ? "bg-gold-soft text-gold" : "text-muted-foreground hover:text-foreground"}`}>
             <x.icon className="h-4 w-4" />
             {x.label}
           </button>

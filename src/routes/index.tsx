@@ -51,7 +51,7 @@ function Pill({ children, tone = "gold" }: { children: ReactNode; tone?: "gold" 
     destructive: "bg-destructive/15 text-destructive ring-destructive/30",
     violet: "bg-violet/15 text-violet ring-violet/30",
   } as const;
-  return <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1", tones[tone])}>{children}</span>;
+  return <span className={cn("inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1", tones[tone])}>{children}</span>;
 }
 
 function FakeSwitch({ on = true }: { on?: boolean }) {
@@ -341,7 +341,7 @@ function Index() {
   return (
     <Shell>
       {/* ---------------- Hero ---------------- */}
-      <section className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 pb-20 pt-12 lg:grid-cols-[1.05fr_1fr] lg:pt-20">
+      <section className="relative mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] items-center gap-10 px-4 pb-16 pt-8 sm:px-5 lg:grid-cols-[1.05fr_1fr] lg:gap-12 lg:pb-20 lg:pt-20">
         <div className="relative z-10">
           {error && (
             <div className="animate-pop-in mb-6 rounded-xl border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm">
@@ -362,27 +362,27 @@ function Index() {
           <h1 className="mt-7 font-sans text-4xl font-black leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
             Run your Discord server with <span className="text-shimmer">Argus</span>
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:mt-6 sm:text-lg">
             The all-seeing guardian for your community: auto-moderation, logs, tickets, welcome messages and an AI server builder — all in one dashboard.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <a href={botInviteUrl()} target="_blank" rel="noreferrer" className="btn-gold flex items-center gap-2 rounded-xl px-7 py-3.5 text-base">
+            <a href={botInviteUrl()} target="_blank" rel="noreferrer" className="btn-gold flex items-center gap-2 rounded-xl px-5 py-3.5 text-base sm:px-7">
               <Plus className="h-5 w-5" /> {t.addToServer}
             </a>
-            <a href="#features" className="btn-ghost flex items-center gap-2 rounded-xl px-7 py-3.5 text-base">
+            <a href="#features" className="btn-ghost flex items-center gap-2 rounded-xl px-5 py-3.5 text-base sm:px-7">
               {t.learnMore} <ArrowRight className="h-4 w-4 text-gold" />
             </a>
           </div>
 
-          <dl className="mt-10 flex gap-10">
+          <dl className="mt-8 flex flex-wrap gap-x-8 gap-y-4 sm:mt-10 sm:gap-x-10">
             <div>
               <dt className="text-xs uppercase tracking-widest text-muted-foreground">Servers</dt>
-              <dd className="mt-1 font-mono text-3xl font-bold tabular-nums">{s ? <CountUp value={s.guilds} /> : formatCount(null)}</dd>
+              <dd className="mt-1 font-mono text-2xl font-bold tabular-nums sm:text-3xl">{s ? <CountUp value={s.guilds} /> : formatCount(null)}</dd>
             </div>
             <div>
               <dt className="text-xs uppercase tracking-widest text-muted-foreground">Members watched</dt>
-              <dd className="mt-1 font-mono text-3xl font-bold tabular-nums">{s?.users != null ? <CountUp value={s.users} /> : formatCount(null)}</dd>
+              <dd className="mt-1 font-mono text-2xl font-bold tabular-nums sm:text-3xl">{s?.users != null ? <CountUp value={s.users} /> : formatCount(null)}</dd>
             </div>
           </dl>
           {status.data && !status.data.ok && (
@@ -403,7 +403,7 @@ function Index() {
       {/* ---------------- Features ---------------- */}
       <section id="features" className="mx-auto max-w-7xl scroll-mt-24 px-5 pb-12">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-gold">Features</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold sm:text-sm sm:tracking-[0.35em]">Features</p>
           <h2 className="mt-3 font-sans text-3xl font-black tracking-tight md:text-5xl">Everything your server needs</h2>
           <p className="mt-4 text-muted-foreground">Moderation, support and growth tools in one place — fast to set up, pleasant to use.</p>
         </Reveal>
@@ -411,12 +411,12 @@ function Index() {
         <div className="mt-16 space-y-20 md:space-y-28">
           {FEATURES.map((f, i) => (
             <Reveal key={f.kicker}>
-              <div className="grid items-center gap-8 md:grid-cols-2 md:gap-14">
+              <div className="grid grid-cols-[minmax(0,1fr)] items-center gap-8 md:grid-cols-2 md:gap-14">
                 <div className={cn(i % 2 === 1 && "md:order-2")}>
                   <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gold-soft ring-1 ring-gold/25">
                     <f.icon className="h-6 w-6 text-gold" />
                   </span>
-                  <p className="mt-5 text-sm font-semibold uppercase tracking-[0.3em] text-gold">{f.kicker}</p>
+                  <p className="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-gold sm:text-sm sm:tracking-[0.3em]">{f.kicker}</p>
                   <h3 className="mt-2 font-sans text-2xl font-extrabold tracking-tight md:text-3xl">{f.title}</h3>
                   <p className="mt-4 leading-relaxed text-muted-foreground">{f.text}</p>
                   <ul className="mt-5 space-y-2.5">
@@ -440,7 +440,7 @@ function Index() {
       {/* ---------------- Get started ---------------- */}
       <section id="start" className="mx-auto max-w-7xl scroll-mt-24 px-5 pb-24 pt-20">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-gold">Get started</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold sm:text-sm sm:tracking-[0.35em]">Get started</p>
           <h2 className="mt-3 font-sans text-3xl font-black tracking-tight md:text-5xl">Ready in three steps</h2>
         </Reveal>
         <div className="mt-12 grid gap-5 md:grid-cols-3">
@@ -462,20 +462,20 @@ function Index() {
       {/* ---------------- Final CTA ---------------- */}
       <section className="mx-auto max-w-7xl px-5 pb-28">
         <Reveal>
-          <div className="glass relative overflow-hidden p-10 text-center md:p-16">
+          <div className="glass relative overflow-hidden p-6 text-center sm:p-10 md:p-16">
             <div className="pointer-events-none absolute -top-24 left-1/2 h-64 w-[36rem] -translate-x-1/2 rounded-full bg-gold/20 blur-3xl" />
             <h2 className="relative font-sans text-3xl font-black tracking-tight md:text-5xl">Let Argus watch over your community</h2>
             <p className="relative mx-auto mt-4 max-w-xl text-muted-foreground">Add the bot, sign in with Discord and open your dashboard in under a minute.</p>
             <div className="relative mt-8 flex flex-wrap justify-center gap-3">
-              <a href={botInviteUrl()} target="_blank" rel="noreferrer" className="btn-gold inline-flex items-center gap-2 rounded-xl px-8 py-4 text-lg">
+              <a href={botInviteUrl()} target="_blank" rel="noreferrer" className="btn-gold inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-base sm:px-8 sm:py-4 sm:text-lg">
                 <Plus className="h-5 w-5" /> {t.addToServer}
               </a>
               {me ? (
-                <Link to="/dashboard" className="btn-ghost inline-flex items-center gap-2 rounded-xl px-8 py-4 text-lg">
+                <Link to="/dashboard" className="btn-ghost inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-base sm:px-8 sm:py-4 sm:text-lg">
                   <LayoutDashboard className="h-5 w-5 text-gold" /> {t.dashboard}
                 </Link>
               ) : (
-                <a href="/api/auth/login" className="btn-ghost inline-flex items-center gap-2 rounded-xl px-8 py-4 text-lg">
+                <a href="/api/auth/login" className="btn-ghost inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-base sm:px-8 sm:py-4 sm:text-lg">
                   <LogIn className="h-5 w-5 text-gold" /> {t.login}
                 </a>
               )}

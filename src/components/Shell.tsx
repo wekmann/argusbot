@@ -30,10 +30,10 @@ export function Shell({ children, bare = false }: { children: ReactNode; bare?: 
           scrolled ? "border-b border-border bg-background/75 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)]" : "border-b border-transparent bg-background/20"
         }`}
       >
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5">
-          <Link to="/" className="group flex items-center gap-3">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4 sm:px-5">
+          <Link to="/" className="group flex min-w-0 shrink-0 items-center gap-2 sm:gap-3">
             <img src="/favicon.png" alt="Argus logo" width={36} height={36} className="h-9 w-9 rounded-full ring-1 ring-gold/40 transition duration-500 group-hover:rotate-[24deg] group-hover:ring-gold" />
-            <span className="font-display text-lg font-bold tracking-[0.25em]">{t.brand.toUpperCase()}</span>
+            <span className="font-display text-base font-bold tracking-[0.15em] sm:text-lg sm:tracking-[0.25em]">{t.brand.toUpperCase()}</span>
           </Link>
           <nav className="hidden items-center gap-1 text-sm md:flex">
             <a href="/#features" className="rounded-lg px-3 py-2 text-muted-foreground transition hover:text-foreground">
@@ -49,23 +49,23 @@ export function Shell({ children, bare = false }: { children: ReactNode; bare?: 
               {t.status}
             </Link>
           </nav>
-          <div className="flex items-center gap-2 text-sm sm:gap-3">
-            <a href={botInviteUrl()} target="_blank" rel="noreferrer" className="btn-ghost flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-2 text-xs sm:gap-2 sm:px-4 sm:text-sm">
-              <Plus className="h-4 w-4 text-gold" /> {t.addToServer}
+          <div className="flex min-w-0 items-center gap-1.5 text-sm sm:gap-3">
+            <a href={botInviteUrl()} target="_blank" rel="noreferrer" className="btn-ghost flex shrink-0 items-center gap-2 rounded-xl px-2.5 py-2 sm:px-4" aria-label={t.addToServer}>
+              <Plus className="h-4 w-4 text-gold" /> <span className="hidden min-[430px]:inline">{t.addToServer}</span>
             </a>
             {me ? (
               <>
-                <Link to="/dashboard" className="btn-gold flex items-center gap-2 rounded-xl px-3 py-2 text-xs sm:px-4 sm:text-sm">
+                <Link to="/dashboard" className="btn-gold flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-[13px] sm:px-4 sm:text-sm">
                   <LayoutDashboard className="hidden h-4 w-4 sm:block" />
                   <span>{t.dashboard}</span>
                 </Link>
-                <img src={avatarUrl(me)} alt={me.username} title={me.username} width={32} height={32} className="h-8 w-8 rounded-full ring-1 ring-gold/70" />
+                <img src={avatarUrl(me)} alt={me.username} title={me.username} width={32} height={32} className="hidden h-8 w-8 shrink-0 rounded-full ring-1 ring-gold/70 min-[400px]:block" />
                 <a href="/api/auth/logout" className="rounded-lg p-2 text-muted-foreground transition hover:text-foreground" aria-label={t.logout} title={t.logout}>
                   <LogOut className="h-4 w-4" />
                 </a>
               </>
             ) : (
-              <a href="/api/auth/login" className="btn-gold flex items-center gap-2 rounded-xl px-4 py-2">
+              <a href="/api/auth/login" className="btn-gold flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 text-[13px] sm:px-4 sm:text-sm">
                 <LogIn className="h-4 w-4" /> {t.login}
               </a>
             )}

@@ -97,13 +97,13 @@ function Overview() {
           {d && d.recent.length === 0 && <p className="px-5 pb-8 text-center text-sm text-muted-foreground">No moderation actions yet.</p>}
           <ul className="divide-y divide-border/50">
             {d?.recent.map((l, i) => (
-              <li key={l.id} className="row-in flex items-center gap-4 px-5 py-3 transition hover:bg-accent/30" style={{ ["--d" as string]: `${i * 60}ms` } as React.CSSProperties}>
+              <li key={l.id} className="row-in flex items-center gap-3 px-4 py-3 transition hover:bg-accent/30 sm:gap-4 sm:px-5" style={{ ["--d" as string]: `${i * 60}ms` } as React.CSSProperties}>
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary font-display text-sm text-gold">{l.target.replace(/^@/, "")[0]?.toUpperCase() ?? "?"}</div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm"><span className="font-semibold">{l.target}</span> <span className="text-muted-foreground">by {l.moderator}</span></p>
                   <p className="truncate text-xs text-muted-foreground">{l.reason ?? "No reason given"}</p>
                 </div>
-                <div className="flex flex-col items-end gap-1">
+                <div className="flex max-w-[45%] shrink-0 flex-col items-end gap-1 sm:max-w-none">
                   <ActionBadge action={l.action} />
                   <span className="text-[11px] text-muted-foreground" title={new Date(l.createdAt).toLocaleString()}>{timeAgo(l.createdAt)}</span>
                 </div>

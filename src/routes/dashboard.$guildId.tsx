@@ -78,8 +78,8 @@ function GuildLayout() {
   ] as const;
 
   return (
-    <div className="mx-auto grid max-w-7xl gap-6 px-5 py-8 lg:grid-cols-[17rem_1fr] lg:gap-8 lg:py-10">
-      <aside className="lg:sticky lg:top-24 lg:self-start">
+    <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] gap-5 px-4 py-6 sm:px-5 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-8 lg:py-10">
+      <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
         <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition hover:text-gold">
           <ArrowLeft className="h-4 w-4" /> {t.servers}
         </Link>
@@ -100,14 +100,15 @@ function GuildLayout() {
           </div>
         </div>
 
-        <nav className="-mx-5 mt-4 flex gap-1 overflow-x-auto px-5 pb-1 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0">
+        <nav className="-mx-4 mt-4 flex gap-1 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:-mx-5 sm:px-5 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0 [&::-webkit-scrollbar]:hidden">
           {nav.map((n) => (
             <Link
               key={n.to}
               to={n.to}
               params={{ guildId }}
               activeOptions={{ exact: "exact" in n }}
-              className="flex shrink-0 items-center gap-3 rounded-xl border border-transparent px-3 py-2 text-[13px] font-semibold text-muted-foreground transition hover:bg-accent/60 hover:text-foreground lg:px-4 lg:py-2.5 lg:text-sm lg:font-medium"              activeProps={{ className: "nav-active" }}
+              className="flex shrink-0 items-center gap-3 rounded-xl border border-transparent px-3 py-2 text-[13px] font-semibold text-muted-foreground transition hover:bg-accent/60 hover:text-foreground lg:px-4 lg:py-2.5 lg:text-sm lg:font-medium"
+              activeProps={{ className: "nav-active" }}
             >
               <n.icon className="hidden h-4 w-4 lg:block" />
               {n.label}
