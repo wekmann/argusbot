@@ -126,8 +126,8 @@ function editMessage(instruction: string, current: CurrentStructure): string {
   ].join("\n");
 }
 
-export async function generateWithGemini(prompt: string, current?: CurrentStructure): Promise<Architecture> {
-  const message = current ? editMessage(prompt, current) : `Server description: ${prompt}`;
+export async function generateWithGemini(prompt: string, current?: unknown): Promise<Architecture> {
+  const message = current ? editMessage(prompt, current as CurrentStructure) : `Server description: ${prompt}`;
   const attempts = buildAttempts(message);
   if (attempts.length === 0) throw new Error("No AI provider is configured on the server (set GEMINI_API_KEY, GROQ_API_KEY, DEEPSEEK_API_KEY or OPENROUTER_API_KEY).");
 

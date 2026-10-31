@@ -1,4 +1,3 @@
-import type { CurrentStructure } from "./architecture";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { architectureSchema, type Architecture } from "./architecture";
@@ -89,10 +88,10 @@ export const getGuildLogs = createServerFn({ method: "GET" })
 /** The server's current roles, categories and channels (with Discord ids), for edit mode. */
 export const getCurrentStructure = createServerFn({ method: "GET" })
   .inputValidator((d) => guildInput.parse(d))
-  .handler(async ({ data }): Promise<CurrentStructure> => {
+  .handler(async ({ data }) => {
     const { requireGuildAdmin, botApi } = await import("./argus.server");
     const { session } = await requireGuildAdmin(data.guildId);
-    return botApi<CurrentStructure>(`/guilds/${data.guildId}/structure?userId=${encodeURIComponent(session.id)}`);
+    return botApi<unknown>(`/guilds/${data.guildId}/structure?userId=${encodeURIComponent(session.id)}`);
   });
 
 const generateInput = guildInput.extend({
@@ -108,7 +107,7 @@ export const generateArchitecture = createServerFn({ method: "POST" })
     const { session } = await requireGuildAdmin(data.guildId);
     const current =
       data.mode === "edit"
-        ? await botApi<CurrentStructure>(`/guilds/${data.guildId}/structure?userId=${encodeURIComponent(session.id)}`)
+        ? await botApi<unknown>(`/guilds/${data.guildId}/structure?userId=${encodeURIComponent(session.id)}`)
         : undefined;
     return generateWithGemini(data.prompt, current);
   });

@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Hash, Megaphone, MessagesSquare, Sparkles, Volume2 } from "lucide-react";
 import { applyArchitecture, generateArchitecture, getCurrentStructure } from "@/lib/argus.functions";
-import type { Architecture } from "@/lib/architecture";
+import type { Architecture, CurrentStructure } from "@/lib/architecture";
 import { Skeleton } from "@/components/motion";
 import { PermissionMatrix } from "@/components/PermissionMatrix";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -63,7 +63,7 @@ function AiBuild() {
 
   const structure = useQuery({
     queryKey: ["ai-structure", guildId],
-    queryFn: () => getCurrentStructure({ data: { guildId } }),
+    queryFn: async () => (await getCurrentStructure({ data: { guildId } })) as CurrentStructure,
     enabled: mode === "edit",
   });
   const gen = useMutation({
