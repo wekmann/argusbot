@@ -20,7 +20,7 @@ export const Route = createFileRoute("/dashboard/$guildId/aibuild")({
   component: AiBuild,
 });
 
-const MAX = 500;
+const MAX = 1000;
 const EXAMPLES = [
   "A Polish gaming community for Valorant and CS2 with tournaments, clips and voice lobbies",
   "A study group for university students with subject channels and quiet voice rooms",

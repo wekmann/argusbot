@@ -86,7 +86,7 @@ export const getGuildLogs = createServerFn({ method: "GET" })
   });
 
 export const generateArchitecture = createServerFn({ method: "POST" })
-  .inputValidator((d) => guildInput.extend({ prompt: z.string().trim().min(3).max(500) }).parse(d))
+  .inputValidator((d) => guildInput.extend({ prompt: z.string().trim().min(3).max(1000) }).parse(d))
   .handler(async ({ data }): Promise<Architecture> => {
     const { requireGuildAdmin } = await import("./argus.server");
     const { generateWithGemini } = await import("./ai.server");
