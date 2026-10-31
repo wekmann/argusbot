@@ -86,7 +86,7 @@ export const getGuildLogs = createServerFn({ method: "GET" })
   });
 
 export const generateArchitecture = createServerFn({ method: "POST" })
-  .inputValidator((d) => guildInput.extend({ prompt: z.string().trim().min(3).max(1000) }).parse(d))
+  .inputValidator((d) => guildInput.extend({ prompt: z.string().trim().min(3).max(500) }).parse(d))
   .handler(async ({ data }): Promise<Architecture> => {
     const { requireGuildAdmin } = await import("./argus.server");
     const { generateWithGemini } = await import("./ai.server");
@@ -94,77 +94,15 @@ export const generateArchitecture = createServerFn({ method: "POST" })
     return generateWithGemini(data.prompt);
   });
 
-export const BUILD_MODES = ["wipe", "add", "roles"] as const;
-export type BuildMode = (typeof BUILD_MODES)[number];
-
-export type ApplyResult = {
-  ok: boolean;
-  buildId: number;
-  status: string;
-  mode: BuildMode;
-  counts: { roles: number; categories: number; channels: number };
-};
-
-export type ApplyPreview = {
-  mode: BuildMode;
-  busy: boolean;
-  botCanManage: boolean;
-  willDelete: { channels: number; categories: number; roles: number };
-  names: { channels: string[]; categories: string[]; roles: string[] };
-  keptChannels: string[];
-  skippedRoles: number;
-};
-
-export type BuildProgress = {
-  id: number;
-  status: "pending" | "running" | "done" | "failed" | string;
-  progress: {
-    mode?: BuildMode;
-    phase?: string;
-    done: number;
-    total: number;
-    warnings: string[];
-    errors: string[];
-    deleted?: { channels: number; categories: number; roles: number };
-    roleIds: string[];
-    categoryIds: string[];
-    channelIds: string[];
-  } | null;
-};
-
-const modeInput = z.enum(BUILD_MODES);
-
 export const applyArchitecture = createServerFn({ method: "POST" })
-  .inputValidator((d) => guildInput.extend({ architecture: architectureSchema, mode: modeInput }).parse(d))
+  .inputValidator((d) => guildInput.extend({ architecture: architectureSchema }).parse(d))
   .handler(async ({ data }) => {
     const { requireGuildAdmin, botApi } = await import("./argus.server");
     const { session } = await requireGuildAdmin(data.guildId);
-    return botApi<ApplyResult>(`/guilds/${data.guildId}/apply`, {
+    return botApi<{ ok: boolean; message?: string }>(`/guilds/${data.guildId}/apply`, {
       method: "POST",
-      body: JSON.stringify({ requestedBy: session.id, userId: session.id, mode: data.mode, architecture: data.architecture }),
+      body: JSON.stringify({ requestedBy: session.id, architecture: data.architecture }),
     });
-  });
-
-/** What the chosen mode would delete (shown in the confirmation dialog). */
-export const getApplyPreview = createServerFn({ method: "GET" })
-  .inputValidator((d) => guildInput.extend({ mode: modeInput }).parse(d))
-  .handler(async ({ data }) => {
-    const { requireGuildAdmin, botApi } = await import("./argus.server");
-    const { session } = await requireGuildAdmin(data.guildId);
-    return botApi<ApplyPreview>(
-      `/guilds/${data.guildId}/apply-preview?userId=${encodeURIComponent(session.id)}&mode=${data.mode}`,
-    );
-  });
-
-/** Polled while a build is running. */
-export const getApplyProgress = createServerFn({ method: "GET" })
-  .inputValidator((d) => guildInput.extend({ buildId: z.number().int().positive() }).parse(d))
-  .handler(async ({ data }) => {
-    const { requireGuildAdmin, botApi } = await import("./argus.server");
-    const { session } = await requireGuildAdmin(data.guildId);
-    return botApi<BuildProgress>(
-      `/guilds/${data.guildId}/apply/${data.buildId}?userId=${encodeURIComponent(session.id)}`,
-    );
   });
 
 export const automodSchema = z.object({
