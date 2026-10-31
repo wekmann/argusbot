@@ -99,7 +99,6 @@ export async function botApi<T>(path: string, init?: RequestInit): Promise<T> {
   const secret = process.env["BOT_API_SECRET"];
   if (!base || !secret) throw new Error("Bot API is not configured (BOT_API_URL / BOT_API_SECRET)");
   const res = await fetch(`${base}${path}`, {
-    signal: AbortSignal.timeout(8000),
     ...init,
     headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/json", ...(init?.headers ?? {}) },
   });

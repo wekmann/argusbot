@@ -85,44 +85,23 @@ export const getGuildLogs = createServerFn({ method: "GET" })
     return (await botApi<{ logs: ModLog[] }>(`/guilds/${data.guildId}/logs?limit=100`)).logs;
   });
 
-/** The server's current roles, categories and channels (with Discord ids), for edit mode. */
-export const getCurrentStructure = createServerFn({ method: "GET" })
-  .inputValidator((d) => guildInput.parse(d))
-  .handler(async ({ data }) => {
-    const { requireGuildAdmin, botApi } = await import("./argus.server");
-    const { session } = await requireGuildAdmin(data.guildId);
-    return botApi<unknown>(`/guilds/${data.guildId}/structure?userId=${encodeURIComponent(session.id)}`);
-  });
-
-const generateInput = guildInput.extend({
-  prompt: z.string().trim().min(3).max(1000),
-  mode: z.enum(["create", "edit"]).default("create"),
-});
-
 export const generateArchitecture = createServerFn({ method: "POST" })
-  .inputValidator((d) => generateInput.parse(d))
+  .inputValidator((d) => guildInput.extend({ prompt: z.string().trim().min(3).max(500) }).parse(d))
   .handler(async ({ data }): Promise<Architecture> => {
-    const { requireGuildAdmin, botApi } = await import("./argus.server");
+    const { requireGuildAdmin } = await import("./argus.server");
     const { generateWithGemini } = await import("./ai.server");
-    const { session } = await requireGuildAdmin(data.guildId);
-    const current =
-      data.mode === "edit"
-        ? await botApi<unknown>(`/guilds/${data.guildId}/structure?userId=${encodeURIComponent(session.id)}`)
-        : undefined;
-    return generateWithGemini(data.prompt, current);
+    await requireGuildAdmin(data.guildId);
+    return generateWithGemini(data.prompt);
   });
 
-/** add = create only (nothing is deleted), edit = update the items in the structure in place. */
 export const applyArchitecture = createServerFn({ method: "POST" })
-  .inputValidator((d) =>
-    guildInput.extend({ architecture: architectureSchema, mode: z.enum(["add", "edit"]).default("add") }).parse(d),
-  )
+  .inputValidator((d) => guildInput.extend({ architecture: architectureSchema }).parse(d))
   .handler(async ({ data }) => {
     const { requireGuildAdmin, botApi } = await import("./argus.server");
     const { session } = await requireGuildAdmin(data.guildId);
     return botApi<{ ok: boolean; message?: string }>(`/guilds/${data.guildId}/apply`, {
       method: "POST",
-      body: JSON.stringify({ requestedBy: session.id, mode: data.mode, architecture: data.architecture }),
+      body: JSON.stringify({ requestedBy: session.id, architecture: data.architecture }),
     });
   });
 
